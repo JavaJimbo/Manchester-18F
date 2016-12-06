@@ -1,0 +1,18 @@
+
+# 1 "../delay.c"
+
+# 11 "../delay.h"
+extern void DelayMs(unsigned short);
+
+# 11 "../delay.c"
+void
+DelayMs(unsigned short count){
+unsigned char i;
+while (count--) {
+i=100;
+while(i--) {
+{ unsigned char downCount; downCount = 4; while(downCount--) {asm("nop");asm("nop");} };
+}
+}
+}
+

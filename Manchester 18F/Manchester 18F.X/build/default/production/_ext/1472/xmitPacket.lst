@@ -1,0 +1,124 @@
+
+
+Microchip Technology PIC18 Macro Assembler V1.37 build -260352376 
+                                                                                                           Tue Dec 06 03:28:28 2016
+
+
+     1                           	processor	18LF2520
+     2                           	opt	pw 132
+     3                           	psect	mytext,local,reloc=2,class=CODE,delta=1
+     4  0000                     stk_offset	set	0
+     5  0000                     auto_size	set	0
+     6                           
+     7                           ; stack_auto defines a symbol /name/_offset which equates to the
+     8                           ; stack offset of the auto object in question
+     9  0000                     
+    10                           ; stack_param defines a symbol /name/_offset which equates to the
+    11                           ; stack offset of the parameter object in question
+    12  0000                     
+    13                           ; alloc_stack adjusts the SP to allocate space for auto objects
+    14                           ; it also links in to the btemp symbol so that can be used
+    15  0000                     
+    16                           ; restore_stack adjusts the SP to remove all auto and parameter
+    17                           ; objects from the stack prior to returning from a function
+    18  0000                     
+    19                           	psect	mytext
+    20  0001BE                     _xmitPacket:
+    21                           	opt stack 29
+    22                           
+    23                           ;incstack = 0
+    24                           ;xmitPacket@numBytes stored from wreg
+    25  0001BE  6E11               	movwf	17,c
+    26                           
+    27                           ;TransmitPacket.c: 9: unsigned char delayTime, delayLoop, index;
+    28                           ;TransmitPacket.c: 11: index = 0;
+    29  0001C0  6A14               	clrf	20,c
+    30                           
+    31                           ;TransmitPacket.c: 12: while (index < numBytes){
+    32  0001C2  D01C               	goto	l825
+    33  0001C4                     l79:
+    34                           
+    35                           ;TransmitPacket.c: 14: if (LATAbits.((LATA) and 0FFh), 0) LATAbits.((LATA) and 0FFh), 0 = 0;
+    36  0001C4  A089               	btfss	3977,0,c	;volatile
+    37  0001C6  D002               	goto	l80
+    38  0001C8  9089               	bcf	3977,0,c	;volatile
+    39  0001CA  D001               	goto	l811
+    40  0001CC                     l80:
+    41                           
+    42                           ;TransmitPacket.c: 15: else LATAbits.((LATA) and 0FFh), 0 = 1;
+    43  0001CC  8089               	bsf	3977,0,c	;volatile
+    44  0001CE                     l811:
+    45                           
+    46                           ;TransmitPacket.c: 17: delayTime = ptrDelay[index];
+    47  0001CE  5014               	movf	20,w,c
+    48  0001D0  0D01               	mullw	1
+    49  0001D2  50F3               	movf	prodl,w,c
+    50  0001D4  240F               	addwf	15,w,c
+    51  0001D6  6ED9               	movwf	fsr2l,c
+    52  0001D8  50F4               	movf	prodh,w,c
+    53  0001DA  2010               	addwfc	16,w,c
+    54  0001DC  6EDA               	movwf	fsr2h,c
+    55  0001DE  50DF               	movf	indf2,w,c
+    56  0001E0  6E12               	movwf	18,c
+    57                           
+    58                           ;TransmitPacket.c: 19: while (delayTime) {
+    59  0001E2  D009               	goto	l821
+    60  0001E4                     l813:
+    61                           
+    62                           ;TransmitPacket.c: 21: delayLoop = 100;
+    63  0001E4  0E3E               	movlw	62
+    64  0001E6  6E13               	movwf	19,c
+    65                           
+    66                           ;TransmitPacket.c: 23: while (delayLoop){
+    67  0001E8  D003               	goto	l817
+    68  0001EA                     l85:
+    69                           
+    70                           ;TransmitPacket.c: 24: __nop();
+    71  0001EA  F000               	nop	
+    72                           
+    73                           ;TransmitPacket.c: 25: __nop();
+    74  0001EC  F000               	nop	
+    75                           
+    76                           ;TransmitPacket.c: 26: delayLoop--;
+    77  0001EE  0613               	decf	19,f,c
+    78  0001F0                     l817:
+    79  0001F0  5013               	movf	19,w,c
+    80  0001F2  E1FB               	bnz	l85
+    81                           
+    82                           ;TransmitPacket.c: 27: }
+    83                           ;TransmitPacket.c: 28: delayTime--;
+    84  0001F4  0612               	decf	18,f,c
+    85  0001F6                     l821:
+    86  0001F6  5012               	movf	18,w,c
+    87  0001F8  E1F5               	bnz	l813
+    88                           
+    89                           ;TransmitPacket.c: 29: }
+    90                           ;TransmitPacket.c: 31: index++;
+    91  0001FA  2A14               	incf	20,f,c
+    92  0001FC                     l825:
+    93  0001FC  5011               	movf	17,w,c
+    94  0001FE  5C14               	subwf	20,w,c
+    95  000200  B0D8               	btfsc	status,0,c
+    96                           
+    97                           ;TransmitPacket.c: 32: }
+    98                           ;TransmitPacket.c: 34: return(23);
+    99  000202  0C17               	retlw	23
+   100  000204  D7DF               	goto	l79
+   101                           prodh	equ	0xFF4
+   102                           prodl	equ	0xFF3
+   103                           indf2	equ	0xFDF
+   104                           fsr2h	equ	0xFDA
+   105                           fsr2l	equ	0xFD9
+   106                           status	equ	0xFD8
+
+
+Microchip Technology PIC18 Macro Assembler V1.37 build -260352376 
+Symbol Table                                                                                               Tue Dec 06 03:28:28 2016
+
+                         l80 01CC                           l85 01EA                           l79 01C4  
+                        l811 01CE                          l813 01E4                          l821 01F6  
+                        l817 01F0                          l825 01FC                         fsr2h 000FDA  
+                       indf2 000FDF                         fsr2l 000FD9                         prodh 000FF4  
+                       prodl 000FF3                        status 000FD8           xmitPacket@numBytes 000011  
+         xmitPacket@ptrDelay 00000F                   _xmitPacket 01BE          xmitPacket@delayLoop 000013  
+        xmitPacket@delayTime 000012                 NUMDELAYLOOPS 00003E              xmitPacket@index 000014  
