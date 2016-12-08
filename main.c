@@ -13,6 +13,7 @@
  *  Created xmitTest.c file.
  *  Added multibyte packets and CRC check. Works great! 
  *  12-6-16: Works sending Manchester bytes, no assembly code.
+ *  12-7-16: Added additional optimization, can handle up to 64 bytes: length + data + CRC
  */
 
 #include <xc.h>
@@ -24,8 +25,6 @@
 #include "delay.h"
 #pragma config IESO = OFF, OSC = HS, FCMEN = OFF, BOREN = OFF, PWRT = ON, WDT = OFF, CCP2MX = PORTC, PBADEN = OFF, LPT1OSC = OFF, MCLRE = ON, DEBUG = OFF, STVREN = OFF, XINST = OFF, LVP = OFF, CP0 = OFF, CP1 = OFF, CP2 = OFF, CP3 = OFF  // For 18F2520
 
-
-
 #define false 0
 #define true !false
 #define TRUE true
@@ -36,25 +35,17 @@
 #define PUSHin 		PORTBbits.RB0
 #define TRIG_OUT    PORTBbits.RB5
 
-//extern unsigned short CRCcalculate(unsigned char *message, unsigned char nBytes);
 
 void init(void);
-//#define NUM_LINX_BYTES 8
-//unsigned char arrLinxTest[NUM_LINX_BYTES] = {0b10101010, 0b10101010, 0b0001111, 0b10011001, 0x01, 0x2, 0x03, 0x04};
 
-extern void xmitPacket(unsigned char numBytes, unsigned char *ptrDelay);
+extern void xmitPacket(unsigned short numBytes, unsigned char *ptrDelay);
 extern void xmitBreak(void);
 
-#define MAXHEADER 32
-unsigned char arrHeader[MAXHEADER] = {1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0};
-#define HEADERLENGTH 16
-
-#define MAXPACKETBYTES 129
+#define MAXPACKETBYTES 1024
 unsigned char arrDataPacket[MAXPACKETBYTES];
-#define MAX_DATA_BYTES 8
+#define MAX_DATA_BYTES 64
 unsigned char commandBuffer[MAX_DATA_BYTES];   
-unsigned char createDataPacket(unsigned char *ptrData, unsigned char numDataBytes, unsigned char *ptrPacket);
-
+unsigned short createDataPacket(unsigned char *ptrData, unsigned short numDataBytes, unsigned char *ptrPacket);
 
 #define HIGH_STATE 1
 #define LOW_STATE 0
@@ -62,8 +53,10 @@ unsigned char createDataPacket(unsigned char *ptrData, unsigned char numDataByte
 extern unsigned short CRCcalculate (unsigned char *message, unsigned char nBytes);
 
 
-unsigned char createDataPacket(unsigned char *ptrData, unsigned char numDataBytes, unsigned char *ptrPacket){
-unsigned char dataIndex, packetIndex, byteMask, dataBit, previousDataBit, i, state;
+
+unsigned short createDataPacket(unsigned char *ptrData, unsigned short numDataBytes, unsigned char *ptrPacket){
+unsigned char byteMask, dataBit, previousDataBit, i, state;
+unsigned short dataIndex, packetIndex;
 
     if ( (numDataBytes > MAX_DATA_BYTES) || (ptrData == NULL) || (ptrPacket == NULL) )
         return(0);
@@ -117,9 +110,8 @@ unsigned char dataIndex, packetIndex, byteMask, dataBit, previousDataBit, i, sta
 
 
 void main() {
-unsigned char numBytesToSend;
+unsigned short numBytesToSend;
 unsigned char i;    
-unsigned short CRCinteger;    
 unsigned char command = 0;    
     
 union {
@@ -137,23 +129,25 @@ union {
         PDownOut = 1;                                    
         DelayMs(10);    
         
-        commandBuffer[0] = 5;
-        commandBuffer[1] = 0x12;
-        commandBuffer[2] = 0x34;
-        commandBuffer[3] = 0x56;
-        commandBuffer[4] = 0x78;
-        commandBuffer[5] = 0x9A;
-        convert.CRCinteger = CRCcalculate(&commandBuffer[1], 5);
-        commandBuffer[6] = convert.CRCbyte[0];
-        commandBuffer[7] = convert.CRCbyte[1];
+        commandBuffer[0] = 61;
+        for (i = 1; i < 62; i++) commandBuffer[i] = command++;
+        convert.CRCinteger = CRCcalculate(&commandBuffer[1], 61);
+        commandBuffer[i++] = convert.CRCbyte[0];
+        commandBuffer[i++] = convert.CRCbyte[1];
         
-        numBytesToSend = createDataPacket(commandBuffer, 8, arrDataPacket);                        
+        numBytesToSend = createDataPacket(commandBuffer, i, arrDataPacket);       
         
         
+        //xmitStartSequence();
+        //xmitData(commandBuffer, 8);
+        //xmitStopSequence();
+        //TRIG_OUT = 0;
+
+        TRIG_OUT = 1;
         xmitBreak();
         xmitPacket(numBytesToSend, arrDataPacket);
+        TRIG_OUT = 0;
         
-
         DelayMs(1);        
         TX_OUT = 0;
         PDownOut = 0;
