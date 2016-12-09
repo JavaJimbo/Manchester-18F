@@ -15,6 +15,7 @@
  *  12-6-16: Works sending Manchester bytes, no assembly code.
  *  12-7-16: Added additional optimization, can handle up to 64 bytes: length + data + CRC
  *  12-8-16: Set NUM_DATA_BYTES to maximum of 61 data bytes,
+ *  12-9-16: Hooked up MMA8452Q accelerometer to wake up from Sleep on orientation change.
  */
 
 #include <xc.h>
@@ -24,6 +25,7 @@
 #include <stdio.h>
 #include <ctype.h>
 #include "delay.h"
+#include "MMA8452_18F.h"
 #pragma config IESO = OFF, OSC = HS, FCMEN = OFF, BOREN = OFF, PWRT = ON, WDT = OFF, CCP2MX = PORTC, PBADEN = OFF, LPT1OSC = OFF, MCLRE = ON, DEBUG = OFF, STVREN = OFF, XINST = OFF, LVP = OFF, CP0 = OFF, CP1 = OFF, CP2 = OFF, CP3 = OFF  // For 18F2520
 
 #define false 0
@@ -53,92 +55,67 @@ unsigned short createDataPacket(unsigned char *ptrData, unsigned short numDataBy
 
 extern unsigned short CRCcalculate (unsigned char *message, unsigned char nBytes);
 
-
-
-unsigned short createDataPacket(unsigned char *ptrData, unsigned short numDataBytes, unsigned char *ptrPacket){
-unsigned char byteMask, dataBit, previousDataBit, i, state;
-unsigned short dataIndex, packetIndex;
-
-    if ( (numDataBytes > MAX_DATA_BYTES) || (ptrData == NULL) || (ptrPacket == NULL) )
-        return(0);
-    
-    previousDataBit = 0;
-    state = LOW_STATE;
-    
-    packetIndex = dataIndex = 0;
-    byteMask = 0x01;
-    
-    while (dataIndex < numDataBytes){
-        byteMask = 0x01;
-        for (i = 0; i < 8; i++) {
-            if (byteMask & ptrData[dataIndex]) dataBit = 1;
-            else dataBit = 0;
-
-            // If data bit is same state as previous data bit,
-            // then packet gets two short pulses:
-            if (dataBit == previousDataBit){    
-                if (state == HIGH_STATE){
-                    ptrPacket[packetIndex++] = SHORT_PULSE_HI;
-                    ptrPacket[packetIndex++] = SHORT_PULSE_LOW;
-                }
-                else{
-                    ptrPacket[packetIndex++] = SHORT_PULSE_LOW;
-                    ptrPacket[packetIndex++] = SHORT_PULSE_HI;                    
-                }
-            }
-            // Otherwise, if data bit is different than previous,
-            // then packet gets one long pulse:
-            else {
-                if (state == HIGH_STATE){
-                    state = LOW_STATE;
-                    ptrPacket[packetIndex++] = LONG_PULSE_HI;
-                }
-                else {
-                    state = HIGH_STATE;
-                    ptrPacket[packetIndex++] = LONG_PULSE_LOW;
-                }
-            }
-
-            previousDataBit = dataBit;
-            byteMask = byteMask << 1;
-        }
-        dataIndex++;
-    }
-    if (packetIndex >= MAXPACKETBYTES) return (0);
-    else return(packetIndex);
-}
-
-
+#define MAX_I2C_REGISTERS 6
+unsigned char PORTBreg;
 
 void main() {
 unsigned short numBytesToSend;
 unsigned char i, j;  
 unsigned char command = 0;    
+unsigned char accelerometerBuffer[MAX_I2C_REGISTERS];
+unsigned char orientationData = 0;;
+unsigned char interruptSource = 0, intDataReg = 0;
+short rawVectx, rawVecty, rawVectz;
+unsigned char initResult = 0;
+
     
 union {
-    unsigned char CRCbyte[2];
-    unsigned short CRCinteger;
+    unsigned char byte[2];
+    unsigned short integer;
 } convert;    
     
     init();
+    initialize_I2C();
+    initResult = initMMA8452();
     
-    while(1){
-                
-        DelayMs(10);
+    while(1){                
+        do {
+            readRegisters(ACCELEROMETER_ID, INTERRUPT_SOURCE, 1, &interruptSource);
+            if (interruptSource & 0x10) {
+                intDataReg = interruptSource;
+                readRegisters(ACCELEROMETER_ID, ORIENTATION_STATUS, 1, &orientationData);
+            }
+        } while (interruptSource != 0);
+        
         Sleep();    
         
-                                            
-        // DelayMs(10);    
+        readRegisters(ACCELEROMETER_ID, 0x01, MAX_I2C_REGISTERS, accelerometerBuffer);        
+        rawVectx = convertValue(accelerometerBuffer[0], accelerometerBuffer[1]);
+        rawVectz = convertValue(accelerometerBuffer[2], accelerometerBuffer[3]);
+        rawVecty = convertValue(accelerometerBuffer[4], accelerometerBuffer[5]);              
         
-#define NUM_DATA_BYTES 5        
+#define NUM_DATA_BYTES 8
         i = 0; 
         commandBuffer[i++] = NUM_DATA_BYTES; 
-        for (j = 0; j < NUM_DATA_BYTES; j++){
-            commandBuffer[i++] = command++;
-        }
-        convert.CRCinteger = CRCcalculate(&commandBuffer[1], NUM_DATA_BYTES);
-        commandBuffer[i++] = convert.CRCbyte[0];
-        commandBuffer[i++] = convert.CRCbyte[1];
+                
+        commandBuffer[i++] = PORTBreg;
+        commandBuffer[i++] = orientationData;
+
+        convert.integer = rawVectx;
+        commandBuffer[i++] = convert.byte[0];
+        commandBuffer[i++] = convert.byte[1];        
+        
+        convert.integer = rawVectz;
+        commandBuffer[i++] = convert.byte[0];
+        commandBuffer[i++] = convert.byte[1];        
+        
+        convert.integer = rawVecty;
+        commandBuffer[i++] = convert.byte[0];
+        commandBuffer[i++] = convert.byte[1];                
+
+        convert.integer = CRCcalculate(&commandBuffer[1], NUM_DATA_BYTES);
+        commandBuffer[i++] = convert.byte[0];
+        commandBuffer[i++] = convert.byte[1];
         
         numBytesToSend = createDataPacket(commandBuffer, i, arrDataPacket);       
         
@@ -208,8 +185,9 @@ void init(void) {
 */ 
 
     // Set up interrupts. 
-    INTCON = 0x00; // Clear all interrupts
-    INTCONbits.INT0IE = 1; // Enable pushbutton interrupts
+    INTCON = 0x00;          // Clear all interrupts
+    INTCONbits.INT0IE = 1;  // Enable pushbutton interrupts
+    INTCONbits.RBIE = 1;    // Enable accelerometer interrupts
 
     INTCON2 = 0x00;
     INTCON2bits.RBPU = 0;       // Enable Port B pullups 
@@ -221,6 +199,64 @@ void init(void) {
 
 static void interrupt isr(void) {
     if (INTCONbits.INT0IF) INTCONbits.INT0IF = 0;
+    if (INTCONbits.RBIF) {
+        PORTBreg = PORTB;
+        INTCONbits.RBIF = 0;
+    }
+}
+
+
+unsigned short createDataPacket(unsigned char *ptrData, unsigned short numDataBytes, unsigned char *ptrPacket){
+unsigned char byteMask, dataBit, previousDataBit, i, state;
+unsigned short dataIndex, packetIndex;
+
+    if ( (numDataBytes > MAX_DATA_BYTES) || (ptrData == NULL) || (ptrPacket == NULL) )
+        return(0);
+    
+    previousDataBit = 0;
+    state = LOW_STATE;
+    
+    packetIndex = dataIndex = 0;
+    byteMask = 0x01;
+    
+    while (dataIndex < numDataBytes){
+        byteMask = 0x01;
+        for (i = 0; i < 8; i++) {
+            if (byteMask & ptrData[dataIndex]) dataBit = 1;
+            else dataBit = 0;
+
+            // If data bit is same state as previous data bit,
+            // then packet gets two short pulses:
+            if (dataBit == previousDataBit){    
+                if (state == HIGH_STATE){
+                    ptrPacket[packetIndex++] = SHORT_PULSE_HI;
+                    ptrPacket[packetIndex++] = SHORT_PULSE_LOW;
+                }
+                else{
+                    ptrPacket[packetIndex++] = SHORT_PULSE_LOW;
+                    ptrPacket[packetIndex++] = SHORT_PULSE_HI;                    
+                }
+            }
+            // Otherwise, if data bit is different than previous,
+            // then packet gets one long pulse:
+            else {
+                if (state == HIGH_STATE){
+                    state = LOW_STATE;
+                    ptrPacket[packetIndex++] = LONG_PULSE_HI;
+                }
+                else {
+                    state = HIGH_STATE;
+                    ptrPacket[packetIndex++] = LONG_PULSE_LOW;
+                }
+            }
+
+            previousDataBit = dataBit;
+            byteMask = byteMask << 1;
+        }
+        dataIndex++;
+    }
+    if (packetIndex >= MAXPACKETBYTES) return (0);
+    else return(packetIndex);
 }
 
 /*
