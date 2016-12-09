@@ -16,6 +16,7 @@
  *  12-7-16: Added additional optimization, can handle up to 64 bytes: length + data + CRC
  *  12-8-16: Set NUM_DATA_BYTES to maximum of 61 data bytes,
  *  12-9-16: Hooked up MMA8452Q accelerometer to wake up from Sleep on orientation change.
+ *           Added wake up an acceleration change - works great waving wand around,,
  */
 
 #include <xc.h>
@@ -38,6 +39,12 @@
 #define PUSHin 		PORTBbits.RB0
 #define TRIG_OUT    PORTBbits.RB5
 
+// #define ORIENTATION_DETECTION
+#define MOTION_DETECTION
+
+#define ORIENTATION_BIT 0x10
+#define MOTION_BIT 0x04
+#define INTERRUPT_STATUS ORIENTATION_BIT
 
 void init(void);
 
@@ -57,13 +64,22 @@ extern unsigned short CRCcalculate (unsigned char *message, unsigned char nBytes
 
 #define MAX_I2C_REGISTERS 6
 unsigned char PORTBreg;
+unsigned char pushFlag = FALSE;
 
 void main() {
 unsigned short numBytesToSend;
 unsigned char i, j;  
 unsigned char command = 0;    
 unsigned char accelerometerBuffer[MAX_I2C_REGISTERS];
-unsigned char orientationData = 0;;
+
+#ifdef ORIENTATION_DETECTION
+unsigned char orientationData = 0;
+#endif
+
+#ifdef MOTION_DETECTION
+unsigned char motionDetection = 0;
+#endif
+
 unsigned char interruptSource = 0, intDataReg = 0;
 short rawVectx, rawVecty, rawVectz;
 unsigned char initResult = 0;
@@ -78,14 +94,23 @@ union {
     initialize_I2C();
     initResult = initMMA8452();
     
-    while(1){                
+    while(1){                        
+        
+#ifdef ORIENTATION_DETECTION       
         do {
-            readRegisters(ACCELEROMETER_ID, INTERRUPT_SOURCE, 1, &interruptSource);
-            if (interruptSource & 0x10) {
-                intDataReg = interruptSource;
-                readRegisters(ACCELEROMETER_ID, ORIENTATION_STATUS, 1, &orientationData);
-            }
+            readRegisters(ACCELEROMETER_ID, 0x0C, 1, &interruptSource);     // Read Interrupt Source register            
+            if (interruptSource & 0x10)                                     // If this is an orientation interrupt,                  
+                readRegisters(ACCELEROMETER_ID, 0x10, 1, &orientationData); // then read orientation status register
         } while (interruptSource != 0);
+#endif
+        
+#ifdef MOTION_DETECTION
+        do {
+            readRegisters(ACCELEROMETER_ID, 0x0C, 1, &interruptSource);     // Read Interrupt Source register            
+            if (interruptSource & 0x04)                                     // If this is an motion detection interrupt,
+                readRegisters(ACCELEROMETER_ID, 0x16, 1, &motionDetection); // then read motion register
+        } while (interruptSource != 0);
+#endif        
         
         Sleep();    
         
@@ -94,13 +119,18 @@ union {
         rawVectz = convertValue(accelerometerBuffer[2], accelerometerBuffer[3]);
         rawVecty = convertValue(accelerometerBuffer[4], accelerometerBuffer[5]);              
         
-#define NUM_DATA_BYTES 8
+#define NUM_DATA_BYTES 7
         i = 0; 
-        commandBuffer[i++] = NUM_DATA_BYTES; 
-                
-        commandBuffer[i++] = PORTBreg;
-        commandBuffer[i++] = orientationData;
+        commandBuffer[i++] = NUM_DATA_BYTES;                 
 
+#ifdef ORIENTATION_DETECTION         
+        commandBuffer[i++] = orientationData;
+#endif        
+        
+#ifdef MOTION_DETECTION         
+        commandBuffer[i++] = motionDetection;
+        motionDetection = 0x00;
+#endif                
         convert.integer = rawVectx;
         commandBuffer[i++] = convert.byte[0];
         commandBuffer[i++] = convert.byte[1];        
@@ -132,11 +162,14 @@ union {
         TX_OUT = 0;
         TRIG_OUT = 0;
         
-        do {
+        if (pushFlag){
+            do {
+                DelayMs(20);
+            } while (!PUSHin);
             DelayMs(20);
-        } while (!PUSHin);
-        DelayMs(20);
-        while (!PUSHin);        
+            while (!PUSHin);        
+            pushFlag = FALSE;
+        }
     }
 }
 
@@ -198,7 +231,11 @@ void init(void) {
 
 
 static void interrupt isr(void) {
-    if (INTCONbits.INT0IF) INTCONbits.INT0IF = 0;
+    if (INTCONbits.INT0IF) {
+        INTCONbits.INT0IF = 0;
+        pushFlag = TRUE;
+    }
+    
     if (INTCONbits.RBIF) {
         PORTBreg = PORTB;
         INTCONbits.RBIF = 0;
@@ -266,3 +303,5 @@ void putch(unsigned char TxByte) {
     return;
 }
 */
+
+// if (!writeByteToRegister(ACCELEROMETER_ID, 0x16, )) return (FALSE); // Register 0x16 Motion/Freefall Source Detection                
