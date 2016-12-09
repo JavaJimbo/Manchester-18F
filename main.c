@@ -14,6 +14,7 @@
  *  Added multibyte packets and CRC check. Works great! 
  *  12-6-16: Works sending Manchester bytes, no assembly code.
  *  12-7-16: Added additional optimization, can handle up to 64 bytes: length + data + CRC
+ *  12-8-16: Set NUM_DATA_BYTES to maximum of 61 data bytes,
  */
 
 #include <xc.h>
@@ -111,7 +112,7 @@ unsigned short dataIndex, packetIndex;
 
 void main() {
 unsigned short numBytesToSend;
-unsigned char i;    
+unsigned char i, j;  
 unsigned char command = 0;    
     
 union {
@@ -122,21 +123,24 @@ union {
     init();
     
     while(1){
-        PDownOut = 0;        
+                
         DelayMs(10);
         Sleep();    
         
-        PDownOut = 1;                                    
-        DelayMs(10);    
+                                            
+        // DelayMs(10);    
         
-        commandBuffer[0] = 61;
-        for (i = 1; i < 62; i++) commandBuffer[i] = command++;
-        convert.CRCinteger = CRCcalculate(&commandBuffer[1], 61);
+#define NUM_DATA_BYTES 5        
+        i = 0; 
+        commandBuffer[i++] = NUM_DATA_BYTES; 
+        for (j = 0; j < NUM_DATA_BYTES; j++){
+            commandBuffer[i++] = command++;
+        }
+        convert.CRCinteger = CRCcalculate(&commandBuffer[1], NUM_DATA_BYTES);
         commandBuffer[i++] = convert.CRCbyte[0];
         commandBuffer[i++] = convert.CRCbyte[1];
         
         numBytesToSend = createDataPacket(commandBuffer, i, arrDataPacket);       
-        
         
         //xmitStartSequence();
         //xmitData(commandBuffer, 8);
@@ -144,13 +148,12 @@ union {
         //TRIG_OUT = 0;
 
         TRIG_OUT = 1;
+        PDownOut = 1;
         xmitBreak();
         xmitPacket(numBytesToSend, arrDataPacket);
-        TRIG_OUT = 0;
-        
-        DelayMs(1);        
-        TX_OUT = 0;
         PDownOut = 0;
+        TX_OUT = 0;
+        TRIG_OUT = 0;
         
         do {
             DelayMs(20);
