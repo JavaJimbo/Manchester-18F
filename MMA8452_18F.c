@@ -14,6 +14,7 @@
 
 // #define ORIENTATION_DETECTION
 #define MOTION_DETECTION
+#define SLEEP_MODE 
 
 // This routine initiates I2C reads and writes
 // It sends a START, then the DEVICE address,
@@ -109,33 +110,61 @@ unsigned char initMMA8452(void) {
     //if (!readRegisters(ACCELEROMETER_ID, WHO_AM_I, 1, accelData)) return (FALSE); // Read WHO_AM_I register
     //if (accelData[0] != 0x2A) return (FALSE); // WHO_AM_I should always be 0x2A
 
-    if (!readRegisters(ACCELEROMETER_ID, CTRL_REG1, 1, accelData)) return (FALSE); 
+    // 1) Put MMA8452Q in STANDBY MODE by clearing bit 0 in 0x20
+    if (!readRegisters(ACCELEROMETER_ID, 0x2A, 1, accelData)) return (FALSE); // Read System Control Register #1
     commandByte = accelData[0];
     commandByte &= 0xFE; // Set last bit to 0 for STANDBY mode
-    commandByte &= 0xC7; // Clear the sample rate bits
-    commandByte |= 0x18; //Set the sample rate bits to 400 Hz = 0x08, 100 Hz = 0x18, 200 Hz = 0x10, 800 Hz = 0x00, 50 Hz = 0x20
-    if (!writeByteToRegister(ACCELEROMETER_ID, CTRL_REG1, commandByte)) return (FALSE);
-        
-    if (!writeByteToRegister(ACCELEROMETER_ID, POWER_MODE, 0b00000000)) return (FALSE);  // Use normal power modes
+    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2A, commandByte)) return (FALSE);
+
+    // 2) Enable SLEEP mode in register 0x2B
+    if (!readRegisters(ACCELEROMETER_ID, 0x2B, 1, accelData)) return (FALSE);  // Set System Control Register #2: enable SLEEP bit 
+    commandByte = accelData[0];    
+    commandByte | = 0x04; //Set Sleep Enable bit
+    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2B, commandByte)) return (FALSE);     
     
+    // 3) Set sample rates in register 0x2A:
+    if (!readRegisters(ACCELEROMETER_ID, 0x2A, 1, accelData)) return (FALSE); // Read System Control Register #1
+    commandByte = accelData[0];
+    commandByte &= 0x5E; // Clear sample bits
+    // commandByte |= 0x58; // SLEEP = 01 (6.25 Hz), WAKE = 011(100 Hz)
+    commandByte |= 0b01011000; // SLEEP = 01 (12.5 Hz), WAKE = 011(100 Hz)
+    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2A, commandByte)) return (FALSE);
+    
+    // 4) In register 0x2B, set the Wake Oversampling Mode to High Resolution (10) 
+    // and the Sleep Oversampling Mode to Low Power (11)
+    if (!readRegisters(ACCELEROMETER_ID, 0x2B, 1, accelData)) return (FALSE);  // Set System Control Register #2: enable SLEEP bit 
+    commandByte = accelData[0];    
+    commandByte &= 0xE4;    // Puts both Oversampling modes in Normal Mode
+    commandByte |= 0x1A;    // Wake High Res, Sleep Low Power
+    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2B, commandByte)) return (FALSE);     
+    
+    // 5) Set Interrupt Enable Register 0x2D for AUTO-WAKE and motion detection:
+    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2D, 0x84)) return (FALSE);  // Interrupt enable register: use motion detection
+
+    // 6) Route the interrupt chosen and enabled to INT1 in Register 0x2E    
+    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2E, 0x04)) return (FALSE);  // Interrupt configuration register:  use INT1 PIN
+    
+    // 7) Enable the interrupts that will wake the device from sleep.
+    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2C, 0x0A)) return (FALSE);   //  Interrupt control: int pin is active high, motion wakeup enabled    
+
+    // 8) Set dynamic range to 2G:
+    if (!readRegisters(ACCELEROMETER_ID, 0x0E, 1, accelData)) return (FALSE);  
+    commandByte = accelData[0];    
+    commandByte &= 0xFC; //Clear the FS bits to 2g
+    if (!writeByteToRegister(ACCELEROMETER_ID, 0x0E, commandByte)) return (FALSE);     
+    
+    if (!writeByteToRegister(ACCELEROMETER_ID, 0x29, 64)) return (FALSE); // Set Timeout counter to go into SLEEP mode after 320 ms x 64 = 20.48 seconds of inactivity
        
     if (!writeByteToRegister(ACCELEROMETER_ID, 0x15, 0xF8)) return (FALSE); // Register 0x15 Motion Config: Enable Latch, Motion, Z-axis,  X-axis, Y-axis
     if (!writeByteToRegister(ACCELEROMETER_ID, 0x17, 0x18)) return (FALSE); // Register 0x17 Set Threshold for > 1.5g:  1.5g/0.063g = 23.8; Round up to 24
     if (!writeByteToRegister(ACCELEROMETER_ID, 0x18, 0x04)) return (FALSE); // Register 0x18 Debounce Counter: 40 ms debounce timing. This was 0x0A for 100 ms debounce
     
-    // Set up interrupts for orientation detection
-    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2D, 0x04)) return (FALSE);  // Interrupt enable register: use motion detection
-    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2E, 0x04)) return (FALSE);  // Interrupt configuration register:  use INT1 PIN
-    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2C, 0x0A)) return (FALSE);   //  Interrupt control: int pin is active high, motion wakeup enabled
     if (!readRegisters(ACCELEROMETER_ID, 0x0C, 1, accelData)) return (FALSE);  // Read Interrupt Source register to make sure it's cleared
-    
-    if (!writeByteToRegister(ACCELEROMETER_ID, XYZ_DATA_CFG, 0x00)) return (FALSE); // Set range to 2 G, disable high pass filtering
-    
 
-    if (!readRegisters(ACCELEROMETER_ID, CTRL_REG1, 1, accelData)) return (FALSE); // Put in ACTIVE mode
+    if (!readRegisters(ACCELEROMETER_ID, 0x2A, 1, accelData)) return (FALSE); // Put in ACTIVE mode
     commandByte = accelData[0];
     commandByte |= 0x01;
-    if (!writeByteToRegister(ACCELEROMETER_ID, CTRL_REG1, commandByte)) return (FALSE);
+    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2A, commandByte)) return (FALSE);
 
     return (TRUE);
 }
