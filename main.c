@@ -16,7 +16,10 @@
  *  12-7-16: Added additional optimization, can handle up to 64 bytes: length + data + CRC
  *  12-8-16: Set NUM_DATA_BYTES to maximum of 61 data bytes,
  *  12-9-16: Hooked up MMA8452Q accelerometer to wake up from Sleep on orientation change.
- *           Added wake up an acceleration change - works great waving wand around,,
+ *           Added wake up an acceleration change - works great waving wand around.
+ *  12-12-16: Enabled SLEEP mode on MMA8452Q. Seems to draw about 120 uA when sleeping.
+ *          Sampling rate in WAKE mode set to 100 Hz, SLEEP mode is 12.5 Hz.
+ *          Timeout in WAKE mode before going back to SLEEP is about 21 seconds.
  */
 
 #include <xc.h>
@@ -78,6 +81,7 @@ unsigned char orientationData = 0;
 
 #ifdef MOTION_DETECTION
 unsigned char motionDetection = 0;
+unsigned char sysModRegister = 0;
 #endif
 
 unsigned char interruptSource = 0, intDataReg = 0;
@@ -107,14 +111,18 @@ union {
 #ifdef MOTION_DETECTION
         do {
             readRegisters(ACCELEROMETER_ID, 0x0C, 1, &interruptSource);     // Read Interrupt Source register            
-            if (interruptSource & 0x04)                                     // If this is an motion detection interrupt,
-                readRegisters(ACCELEROMETER_ID, 0x16, 1, &motionDetection); // then read motion register
+            if (interruptSource){                                           
+                readRegisters(ACCELEROMETER_ID, 0x0B, 1, &sysModRegister);  // Clear Sys Mod Register
+                readRegisters(ACCELEROMETER_ID, 0x16, 1, &motionDetection); // If this is an motion detection interrupt, then read motion register
+            }
         } while (interruptSource != 0);
 #endif        
         
+        PDownOut = 0;
+        TX_OUT = 0;        
         Sleep();    
         
-        readRegisters(ACCELEROMETER_ID, 0x01, MAX_I2C_REGISTERS, accelerometerBuffer);        
+        readRegisters(ACCELEROMETER_ID, 0x01, MAX_I2C_REGISTERS, accelerometerBuffer);
         rawVectx = convertValue(accelerometerBuffer[0], accelerometerBuffer[1]);
         rawVectz = convertValue(accelerometerBuffer[2], accelerometerBuffer[3]);
         rawVecty = convertValue(accelerometerBuffer[4], accelerometerBuffer[5]);              
