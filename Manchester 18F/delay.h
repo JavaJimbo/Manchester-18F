@@ -6,6 +6,11 @@
  * 
  */
 
+#define SHORT_PULSE_HI 0
+#define SHORT_PULSE_LOW 1
+#define LONG_PULSE_HI 2
+#define LONG_PULSE_LOW 3
+
 #define	DelayUs(x)	{ unsigned char downCount; downCount = x; while(downCount--) {asm("nop");asm("nop");}	} 
 
 extern void DelayMs(unsigned short);

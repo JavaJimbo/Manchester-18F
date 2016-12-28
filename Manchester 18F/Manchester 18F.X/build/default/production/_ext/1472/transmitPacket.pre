@@ -1,5 +1,5 @@
 
-# 1 "../main.c"
+# 1 "../transmitPacket.c"
 
 # 26 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\htc.h"
 extern const char __xc8_OPTIM_SPEED;
@@ -3419,439 +3419,107 @@ extern __nonreentrant void _delaywdt(unsigned long);
 #pragma intrinsic(_delay3)
 extern __nonreentrant void _delay3(unsigned char);
 
-# 30 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\math.h"
-extern double fabs(double);
-extern double floor(double);
-extern double ceil(double);
-extern double modf(double, double *);
-extern double sqrt(double);
-extern double atof(const char *);
-extern double sin(double) ;
-extern double cos(double) ;
-extern double tan(double) ;
-extern double asin(double) ;
-extern double acos(double) ;
-extern double atan(double);
-extern double atan2(double, double) ;
-extern double log(double);
-extern double log10(double);
-extern double pow(double, double) ;
-extern double exp(double) ;
-extern double sinh(double) ;
-extern double cosh(double) ;
-extern double tanh(double);
-extern double eval_poly(double, const double *, int);
-extern double frexp(double, int *);
-extern double ldexp(double, int);
-extern double fmod(double, double);
-extern double trunc(double);
-extern double round(double);
-
-# 4 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\__size_t.h"
-typedef unsigned size_t;
-
-# 7 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\stdlib.h"
-typedef unsigned short wchar_t;
-
-# 15
-typedef struct {
-int rem;
-int quot;
-} div_t;
-typedef struct {
-unsigned rem;
-unsigned quot;
-} udiv_t;
-typedef struct {
-long quot;
-long rem;
-} ldiv_t;
-typedef struct {
-unsigned long quot;
-unsigned long rem;
-} uldiv_t;
-
-# 53
-extern double atof(const char *);
-extern double strtod(const char *, const char **);
-extern int atoi(const char *);
-extern unsigned xtoi(const char *);
-extern long atol(const char *);
-extern long strtol(const char *, char **, int);
-
-extern int rand(void);
-extern void srand(unsigned int);
-extern void * calloc(size_t, size_t);
-extern div_t div(int numer, int denom);
-extern udiv_t udiv(unsigned numer, unsigned denom);
-extern ldiv_t ldiv(long numer, long denom);
-extern uldiv_t uldiv(unsigned long numer,unsigned long denom);
-extern unsigned long _lrotl(unsigned long value, unsigned int shift);
-extern unsigned long _lrotr(unsigned long value, unsigned int shift);
-extern unsigned int _rotl(unsigned int value, unsigned int shift);
-extern unsigned int _rotr(unsigned int value, unsigned int shift);
-
-
-
-
-extern void * malloc(size_t);
-extern void free(void *);
-extern void * realloc(void *, size_t);
-
-# 86
-extern int atexit(void (*)(void));
-extern char * getenv(const char *);
-extern char ** environ;
-extern int system(char *);
-extern void qsort(void *, size_t, size_t, int (*)(const void *, const void *));
-extern void * bsearch(const void *, void *, size_t, size_t, int(*)(const void *, const void *));
-extern int abs(int);
-extern long labs(long);
-
-extern char * itoa(char * buf, int val, int base);
-extern char * utoa(char * buf, unsigned val, int base);
-
-
-
-
-extern char * ltoa(char * buf, long val, int base);
-extern char * ultoa(char * buf, unsigned long val, int base);
-
-extern char * ftoa(float f, int * status);
-
-# 14 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\string.h"
-extern void * memcpy(void *, const void *, size_t);
-extern void * memmove(void *, const void *, size_t);
-extern void * memset(void *, int, size_t);
-
-# 34
-extern char * strcat(char *, const char *);
-extern char * strcpy(char *, const char *);
-extern char * strncat(char *, const char *, size_t);
-extern char * strncpy(char *, const char *, size_t);
-extern char * strdup(const char *);
-extern char * strtok(char *, const char *);
-
-
-extern int memcmp(const void *, const void *, size_t);
-extern int strcmp(const char *, const char *);
-extern int stricmp(const char *, const char *);
-extern int strncmp(const char *, const char *, size_t);
-extern int strnicmp(const char *, const char *, size_t);
-extern void * memchr(const void *, int, size_t);
-extern size_t strcspn(const char *, const char *);
-extern char * strpbrk(const char *, const char *);
-extern size_t strspn(const char *, const char *);
-extern char * strstr(const char *, const char *);
-extern char * stristr(const char *, const char *);
-extern char * strerror(int);
-extern size_t strlen(const char *);
-extern char * strchr(const char *, int);
-extern char * strichr(const char *, int);
-extern char * strrchr(const char *, int);
-extern char * strrichr(const char *, int);
-
-# 7 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\stdarg.h"
-typedef void * va_list[1];
-
-#pragma intrinsic(__va_start)
-extern void * __va_start(void);
-
-#pragma intrinsic(__va_arg)
-extern void * __va_arg(void *, ...);
-
-# 43 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\stdio.h"
-struct __prbuf
-{
-char * ptr;
-void (* func)(char);
-};
-
-# 29 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\errno.h"
-extern int errno;
-
-# 12 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\conio.h"
-extern void init_uart(void);
-
-extern char getch(void);
-extern char getche(void);
-extern void putch(char);
-extern void ungetch(char);
-
-extern __bit kbhit(void);
-
-# 23
-extern char * cgets(char *);
-extern void cputs(const char *);
-
-# 88 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\stdio.h"
-extern int cprintf(char *, ...);
-#pragma printf_check(cprintf)
-
-
-
-extern int _doprnt(struct __prbuf *, const register char *, register va_list);
-
-
-# 180
-#pragma printf_check(vprintf) const
-#pragma printf_check(vsprintf) const
-
-extern char * gets(char *);
-extern int puts(const char *);
-extern int scanf(const char *, ...) __attribute__((unsupported("scanf() is not supported by this compiler")));
-extern int sscanf(const char *, const char *, ...) __attribute__((unsupported("sscanf() is not supported by this compiler")));
-extern int vprintf(const char *, va_list) __attribute__((unsupported("vprintf() is not supported by this compiler")));
-extern int vsprintf(char *, const char *, va_list) __attribute__((unsupported("vsprintf() is not supported by this compiler")));
-extern int vscanf(const char *, va_list ap) __attribute__((unsupported("vscanf() is not supported by this compiler")));
-extern int vsscanf(const char *, const char *, va_list) __attribute__((unsupported("vsscanf() is not supported by this compiler")));
-
-#pragma printf_check(printf) const
-#pragma printf_check(sprintf) const
-extern int sprintf(char *, const char *, ...);
-extern int printf(const char *, ...);
-
-# 4 "C:\Program Files (x86)\Microchip\xc8\v1.37\include\ctype.h"
-extern __bit isalpha(char);
-extern __bit isupper(char);
-extern __bit islower(char);
-extern __bit isdigit(char);
-extern __bit isxdigit(char);
-extern __bit isspace(char);
-extern __bit ispunct(char);
-extern __bit isalnum(char);
-extern __bit isprint(char);
-extern __bit isgraph(char);
-extern __bit iscntrl(char);
-
-
-extern char toupper(char);
-extern char tolower(char);
-
 # 16 "../delay.h"
 extern void DelayMs(unsigned short);
 
-# 48 "../MMA8452_18F.h"
-extern unsigned char i2c_ReadByte(void);
-extern unsigned char i2c_GetAcknowledge(void);
-extern unsigned char i2c_SendControlByte(unsigned char, unsigned char);
-extern unsigned char i2c_SendByte(unsigned char);
-extern void i2c_Start(void);
-extern void i2c_Restart(void);
-extern void i2c_Stop(void);
-extern void i2c_SendAcknowledge(unsigned char);
-extern unsigned char i2c_read(unsigned char);
-extern void initialize_I2C (void);
+# 17 "../transmitPacket.c"
+void xmitPacket(unsigned short numBytes, unsigned char *ptrDelay){
+unsigned char delayTime, delayLoop;
+unsigned short index;
 
-extern unsigned char TransmitOneByte(unsigned char data);
-extern unsigned char initMMA8452(void);
-extern unsigned char setRegister(unsigned char deviceID, unsigned char deviceREGISTER);
-extern unsigned char sendREADcommand(unsigned char deviceID);
-extern unsigned char readRegisters(unsigned char deviceID, unsigned char deviceREGISTER, unsigned char numRegisters, unsigned char *registerPtr);
-extern unsigned char writeByteToRegister(unsigned char deviceID, unsigned char deviceREGISTER, unsigned char dataByte);
-short getTwosComplement(unsigned char MSBbyte, unsigned char LSBbyte);
-unsigned char initMMA8452(void);
-unsigned char resetMMA8452(void);
-
-
-# 34 "../main.c"
-#pragma config IESO = OFF, OSC = HS, FCMEN = OFF, BOREN = OFF, PWRT = ON, WDT = OFF, CCP2MX = PORTC, PBADEN = OFF, LPT1OSC = OFF, MCLRE = ON, DEBUG = OFF, STVREN = OFF, XINST = OFF, LVP = OFF, CP0 = OFF, CP1 = OFF, CP2 = OFF, CP3 = OFF
-
-# 50
-void init(void);
-
-extern void xmitPacket(unsigned short numBytes, unsigned char *ptrDelay);
-extern void xmitBreak(void);
-
-
-unsigned char arrDataPacket[1024];
-
-unsigned char commandBuffer[64];
-unsigned short createDataPacket(unsigned char *ptrData, unsigned short numDataBytes, unsigned char *ptrPacket);
-
-
-
-
-extern unsigned short CRCcalculate (unsigned char *message, unsigned char nBytes);
-
-
-unsigned char PORTBreg;
-unsigned char pushFlag = 0;
-
-void main() {
-unsigned short numBytesToSend;
-unsigned char i, j;
-unsigned char accelerometerBuffer[6];
-
-unsigned char motionDetection = 0;
-unsigned char sysModRegister = 0;
-unsigned char interruptSource = 0;
-short rawVectx, rawVecty, rawVectz;
-unsigned char initResult = 0;
-
-
-union {
-unsigned char byte[2];
-unsigned short integer;
-} convert;
-
-init();
-initialize_I2C();
-initResult = initMMA8452();
-
-while(1){
-do {
-readRegisters(0x1D, 0x0C, 1, &interruptSource);
-if (interruptSource){
-readRegisters(0x1D, 0x0B, 1, &sysModRegister);
-readRegisters(0x1D, 0x16, 1, &motionDetection);
-}
-} while (interruptSource != 0);
-
-PORTAbits.RA1 = 0;
+LATAbits.LATA0 = 1;
+delayLoop = 70;
+while (delayLoop) delayLoop--;
 LATAbits.LATA0 = 0;
-asm(" sleep");
 
-readRegisters(0x1D, 0x01, 6, accelerometerBuffer);
-rawVectx = getTwosComplement(accelerometerBuffer[0], accelerometerBuffer[1]);
-rawVectz = getTwosComplement(accelerometerBuffer[2], accelerometerBuffer[3]);
-rawVecty = getTwosComplement(accelerometerBuffer[4], accelerometerBuffer[5]);
+index = 0;
+while (index < numBytes) {
+delayTime = ptrDelay[index];
+
+if (delayTime == 0) {
+LATAbits.LATA0 = 1;
+delayLoop = 70;
+} else if (delayTime == 2) {
+LATAbits.LATA0 = 1;
+delayLoop = 233;
+} else if (delayTime == 1) {
+LATAbits.LATA0 = 0;
+delayLoop = 80;
+} else {
+LATAbits.LATA0 = 0;
+delayLoop = 255;
+}
+while (delayLoop) delayLoop--;
+index++;
+}
+
+if (LATAbits.LATA0) LATAbits.LATA0 = 0;
+else LATAbits.LATA0 = 1;
+
+delayLoop = 0xFF;
+while (delayLoop) delayLoop--;
+
+if (LATAbits.LATA0) LATAbits.LATA0 = 0;
+else LATAbits.LATA0 = 1;
+
+delayLoop = 0xFF;
+while (delayLoop) delayLoop--;
+
+LATAbits.LATA0 = 0;
+}
+
+void xmitBreak(void) {
+unsigned char delayTime, delayLoop, numStartPulses;
+
+numStartPulses = 16;
+
+do {
+LATAbits.LATA0 = 1;
+delayLoop = 200;
+while (delayLoop) delayLoop--;
+
+LATAbits.LATA0 = 0;
+delayLoop = 200;
+while (delayLoop) delayLoop--;
+
+numStartPulses--;
+} while (numStartPulses);
 
 
-i = 0;
-commandBuffer[i++] = 7;
+LATAbits.LATA0 = 1;
+delayTime = 12;
+while (delayTime) {
+delayLoop = 74;
+while (delayLoop)delayLoop--;
+delayTime--;
+}
 
-commandBuffer[i++] = motionDetection;
-motionDetection = 0x00;
 
-convert.integer = rawVectx;
-commandBuffer[i++] = convert.byte[0];
-commandBuffer[i++] = convert.byte[1];
+LATAbits.LATA0 = 0;
+delayTime = 13;
+while (delayTime) {
+delayLoop = 60;
+while (delayLoop)delayLoop--;
+delayTime--;
+}
 
-convert.integer = rawVectz;
-commandBuffer[i++] = convert.byte[0];
-commandBuffer[i++] = convert.byte[1];
 
-convert.integer = rawVecty;
-commandBuffer[i++] = convert.byte[0];
-commandBuffer[i++] = convert.byte[1];
+LATAbits.LATA0 = 1;
+delayTime = 5;
+while (delayTime) {
+delayLoop = 74;
+while (delayLoop)delayLoop--;
+delayTime--;
+}
 
-convert.integer = CRCcalculate(&commandBuffer[1], 7);
-commandBuffer[i++] = convert.byte[0];
-commandBuffer[i++] = convert.byte[1];
 
-numBytesToSend = createDataPacket(commandBuffer, i, arrDataPacket);
-
+LATAbits.LATA0 = 0;
+delayTime = 18;
+while (delayTime) {
+delayLoop = 20;
+while (delayLoop)delayLoop--;
+delayTime--;
+}
 PORTBbits.RB5 = 1;
-PORTAbits.RA1 = 1;
-xmitBreak();
-xmitPacket(numBytesToSend, arrDataPacket);
-PORTAbits.RA1 = 0;
-LATAbits.LATA0 = 0;
-PORTBbits.RB5 = 0;
-
-if (pushFlag){
-do {
-DelayMs(20);
-} while (!PORTBbits.RB0);
-DelayMs(20);
-while (!PORTBbits.RB0);
-pushFlag = 0;
-}
-}
-}
-
-void init(void) {
-INTCONbits.GIE = 0;
-
-ADCON0 = 0;
-ADCON1 = 0b00001111;
-
-TRISB = 0b11011111;
-INTCON2bits.RBPU = 0;
-TRISC = 0b11111111;
-
-
-TXSTAbits.TXEN = 0;
-TRISC = 0b11111111;
-TRISA = 0b11111100;
-
-# 198
-INTCON = 0x00;
-INTCONbits.INT0IE = 1;
-INTCONbits.RBIE = 1;
-
-INTCON2 = 0x00;
-INTCON2bits.RBPU = 0;
-INTCON2bits.INTEDG0 = 0;
-INTCONbits.GIE = 1;
-}
-
-
-
-static void interrupt isr(void) {
-if (INTCONbits.INT0IF) {
-INTCONbits.INT0IF = 0;
-pushFlag = !0;
-}
-
-if (INTCONbits.RBIF) {
-PORTBreg = PORTB;
-INTCONbits.RBIF = 0;
-}
-}
-
-
-unsigned short createDataPacket(unsigned char *ptrData, unsigned short numDataBytes, unsigned char *ptrPacket){
-unsigned char byteMask, dataBit, previousDataBit, i, state;
-unsigned short dataIndex, packetIndex;
-
-if ( (numDataBytes > 64) || (ptrData == (0)) || (ptrPacket == (0)) )
-return(0);
-
-previousDataBit = 0;
-state = 0;
-
-packetIndex = dataIndex = 0;
-byteMask = 0x01;
-
-while (dataIndex < numDataBytes){
-byteMask = 0x01;
-for (i = 0; i < 8; i++) {
-if (byteMask & ptrData[dataIndex]) dataBit = 1;
-else dataBit = 0;
-
-
-
-if (dataBit == previousDataBit){
-if (state == 1){
-ptrPacket[packetIndex++] = 0;
-ptrPacket[packetIndex++] = 1;
-}
-else{
-ptrPacket[packetIndex++] = 1;
-ptrPacket[packetIndex++] = 0;
-}
-}
-
-
-else {
-if (state == 1){
-state = 0;
-ptrPacket[packetIndex++] = 2;
-}
-else {
-state = 1;
-ptrPacket[packetIndex++] = 3;
-}
-}
-
-previousDataBit = dataBit;
-byteMask = byteMask << 1;
-}
-dataIndex++;
-}
-if (packetIndex >= 1024) return (0);
-else return(packetIndex);
 }
 
