@@ -3,14 +3,52 @@
 [d edition pro ]
 [d chip 18LF2520 ]
 [d frameptr 4065 ]
+"91 C:\Users\Jim\Documents\Work\Manchester 18F/CRC Check.c
+[v _update_crc_16 update_crc_16 `(us  1 e 2 0 ]
+"107
+[v _CRCcalculate CRCcalculate `(us  1 e 2 0 ]
 "12 C:\Users\Jim\Documents\Work\Manchester 18F/delay.c
 [v _DelayMs DelayMs `(v  1 e 1 0 ]
-"51 C:\Users\Jim\Documents\Work\Manchester 18F/main.c
+"70 C:\Users\Jim\Documents\Work\Manchester 18F/main.c
 [v _main main `(v  1 e 1 0 ]
-"93
+"153
 [v _init init `(v  1 e 1 0 ]
-"149
+"210
 [v _isr isr `II(v  1 s 1 isr ]
+"223
+[v _createDataPacket createDataPacket `(us  1 e 2 0 ]
+"19 C:\Users\Jim\Documents\Work\Manchester 18F/MMA8452_18F.c
+[v _sendREADcommand sendREADcommand `(uc  1 e 1 0 ]
+"33
+[v _setRegister setRegister `(uc  1 e 1 0 ]
+"53
+[v _writeByteToRegister writeByteToRegister `(uc  1 e 1 0 ]
+"82
+[v _readRegisters readRegisters `(uc  1 e 1 0 ]
+"102
+[v _initMMA8452 initMMA8452 `(uc  1 e 1 0 ]
+"172
+[v _getTwosComplement getTwosComplement `(s  1 e 2 0 ]
+"194
+[v _initialize_I2C initialize_I2C `(v  1 e 1 0 ]
+"214
+[v _i2c_Stop i2c_Stop `(v  1 e 1 0 ]
+"223
+[v _i2c_Start i2c_Start `(v  1 e 1 0 ]
+"244
+[v _i2c_SendByte i2c_SendByte `(uc  1 e 1 0 ]
+"257
+[v _i2c_SendControlByte i2c_SendControlByte `(uc  1 e 1 0 ]
+"266
+[v _i2c_GetAcknowledge i2c_GetAcknowledge `(uc  1 e 1 0 ]
+"276
+[v _i2c_ReadByte i2c_ReadByte `(uc  1 e 1 0 ]
+"293
+[v _i2c_SendAcknowledge i2c_SendAcknowledge `(v  1 e 1 0 ]
+"17 C:\Users\Jim\Documents\Work\Manchester 18F/transmitPacket.c
+[v _xmitPacket xmitPacket `(v  1 e 1 0 ]
+"62
+[v _xmitBreak xmitBreak `(v  1 e 1 0 ]
 "62 C:\Program Files (x86)\Microchip\xc8\v1.37\sources\common\float.c
 [v ___ftpack __ftpack `(f  1 e 3 0 ]
 "86 C:\Program Files (x86)\Microchip\xc8\v1.37\sources\common\ftadd.c
@@ -31,9 +69,17 @@
 [v ___flmul __flmul `(d  1 e 3 0 ]
 "15 C:\Program Files (x86)\Microchip\xc8\v1.37\sources\common\Umul32.c
 [v ___lmul __lmul `(ul  1 e 4 0 ]
-"49 C:\Users\Jim\Documents\Work\Manchester 18F/main.c
-[v _arrDelay arrDelay `[128]uc  1 e 128 0 ]
-[s S25 . 1 `uc 1 RA0 1 0 :1:0 
+"21 C:\Users\Jim\Documents\Work\Manchester 18F/CRC Check.c
+[v _crc_tab16 crc_tab16 `C[256]us  1 e 512 0 ]
+"56 C:\Users\Jim\Documents\Work\Manchester 18F/main.c
+[v _arrDataPacket arrDataPacket `[1024]uc  1 e 1024 0 ]
+"58
+[v _commandBuffer commandBuffer `[64]uc  1 e 64 0 ]
+"67
+[v _PORTBreg PORTBreg `uc  1 e 1 0 ]
+"68
+[v _pushFlag pushFlag `uc  1 e 1 0 ]
+[s S41 . 1 `uc 1 RA0 1 0 :1:0 
 `uc 1 RA1 1 0 :1:1 
 `uc 1 RA2 1 0 :1:2 
 `uc 1 RA3 1 0 :1:3 
@@ -43,7 +89,7 @@
 `uc 1 RA7 1 0 :1:7 
 ]
 "115 C:\Program Files (x86)\Microchip\xc8\v1.37\include\pic18lf2520.h
-[s S34 . 1 `uc 1 AN0 1 0 :1:0 
+[s S50 . 1 `uc 1 AN0 1 0 :1:0 
 `uc 1 AN1 1 0 :1:1 
 `uc 1 AN2 1 0 :1:2 
 `uc 1 AN3 1 0 :1:3 
@@ -52,7 +98,7 @@
 `uc 1 OSC2 1 0 :1:6 
 `uc 1 OSC1 1 0 :1:7 
 ]
-[s S43 . 1 `uc 1 . 1 0 :2:0 
+[s S59 . 1 `uc 1 . 1 0 :2:0 
 `uc 1 VREFN 1 0 :1:2 
 `uc 1 VREFP 1 0 :1:3 
 `uc 1 . 1 0 :1:4 
@@ -60,32 +106,34 @@
 `uc 1 CLKO 1 0 :1:6 
 `uc 1 CLKI 1 0 :1:7 
 ]
-[s S51 . 1 `uc 1 . 1 0 :5:0 
+[s S67 . 1 `uc 1 . 1 0 :5:0 
 `uc 1 NOT_SS 1 0 :1:5 
 ]
-[s S54 . 1 `uc 1 . 1 0 :2:0 
+[s S70 . 1 `uc 1 . 1 0 :2:0 
 `uc 1 CVREF 1 0 :1:2 
 `uc 1 . 1 0 :2:3 
 `uc 1 nSS 1 0 :1:5 
 ]
-[s S59 . 1 `uc 1 . 1 0 :5:0 
+[s S75 . 1 `uc 1 . 1 0 :5:0 
 `uc 1 LVDIN 1 0 :1:5 
 ]
-[s S62 . 1 `uc 1 . 1 0 :5:0 
+[s S78 . 1 `uc 1 . 1 0 :5:0 
 `uc 1 HLVDIN 1 0 :1:5 
 ]
-[s S65 . 1 `uc 1 . 1 0 :4:0 
+[s S81 . 1 `uc 1 . 1 0 :4:0 
 `uc 1 C1OUT 1 0 :1:4 
 `uc 1 C2OUT 1 0 :1:5 
 ]
-[s S69 . 1 `uc 1 . 1 0 :7:0 
+[s S85 . 1 `uc 1 . 1 0 :7:0 
 `uc 1 RJPU 1 0 :1:7 
 ]
-[s S72 . 1 `uc 1 ULPWUIN 1 0 :1:0 
+[s S88 . 1 `uc 1 ULPWUIN 1 0 :1:0 
 ]
-[u S74 . 1 `S25 1 . 1 0 `S34 1 . 1 0 `S43 1 . 1 0 `S51 1 . 1 0 `S54 1 . 1 0 `S59 1 . 1 0 `S62 1 . 1 0 `S65 1 . 1 0 `S69 1 . 1 0 `S72 1 . 1 0 ]
-[v _PORTAbits PORTAbits `VES74  1 e 1 @3968 ]
-[s S210 . 1 `uc 1 RB0 1 0 :1:0 
+[u S90 . 1 `S41 1 . 1 0 `S50 1 . 1 0 `S59 1 . 1 0 `S67 1 . 1 0 `S70 1 . 1 0 `S75 1 . 1 0 `S78 1 . 1 0 `S81 1 . 1 0 `S85 1 . 1 0 `S88 1 . 1 0 ]
+[v _PORTAbits PORTAbits `VES90  1 e 1 @3968 ]
+"269
+[v _PORTB PORTB `VEuc  1 e 1 @3969 ]
+[s S245 . 1 `uc 1 RB0 1 0 :1:0 
 `uc 1 RB1 1 0 :1:1 
 `uc 1 RB2 1 0 :1:2 
 `uc 1 RB3 1 0 :1:3 
@@ -95,7 +143,7 @@
 `uc 1 RB7 1 0 :1:7 
 ]
 "313
-[s S219 . 1 `uc 1 INT0 1 0 :1:0 
+[s S254 . 1 `uc 1 INT0 1 0 :1:0 
 `uc 1 INT1 1 0 :1:1 
 `uc 1 INT2 1 0 :1:2 
 `uc 1 CCP2 1 0 :1:3 
@@ -104,7 +152,7 @@
 `uc 1 KBI2 1 0 :1:6 
 `uc 1 KBI3 1 0 :1:7 
 ]
-[s S228 . 1 `uc 1 AN12 1 0 :1:0 
+[s S263 . 1 `uc 1 AN12 1 0 :1:0 
 `uc 1 AN10 1 0 :1:1 
 `uc 1 AN8 1 0 :1:2 
 `uc 1 AN9 1 0 :1:3 
@@ -113,14 +161,14 @@
 `uc 1 PGC 1 0 :1:6 
 `uc 1 PGD 1 0 :1:7 
 ]
-[s S237 . 1 `uc 1 FLT0 1 0 :1:0 
+[s S272 . 1 `uc 1 FLT0 1 0 :1:0 
 ]
-[s S239 . 1 `uc 1 . 1 0 :3:0 
+[s S274 . 1 `uc 1 . 1 0 :3:0 
 `uc 1 CCP2_PA2 1 0 :1:3 
 ]
-[u S242 . 1 `S210 1 . 1 0 `S219 1 . 1 0 `S228 1 . 1 0 `S237 1 . 1 0 `S239 1 . 1 0 ]
-[v _PORTBbits PORTBbits `VES242  1 e 1 @3969 ]
-[s S135 . 1 `uc 1 LATA0 1 0 :1:0 
+[u S277 . 1 `S245 1 . 1 0 `S254 1 . 1 0 `S263 1 . 1 0 `S272 1 . 1 0 `S274 1 . 1 0 ]
+[v _PORTBbits PORTBbits `VES277  1 e 1 @3969 ]
+[s S151 . 1 `uc 1 LATA0 1 0 :1:0 
 `uc 1 LATA1 1 0 :1:1 
 `uc 1 LATA2 1 0 :1:2 
 `uc 1 LATA3 1 0 :1:3 
@@ -130,38 +178,55 @@
 `uc 1 LATA7 1 0 :1:7 
 ]
 "746
-[s S144 . 1 `uc 1 LA0 1 0 :1:0 
+[s S160 . 1 `uc 1 LA0 1 0 :1:0 
 ]
-[s S146 . 1 `uc 1 . 1 0 :1:0 
+[s S162 . 1 `uc 1 . 1 0 :1:0 
 `uc 1 LA1 1 0 :1:1 
 ]
-[s S149 . 1 `uc 1 . 1 0 :2:0 
+[s S165 . 1 `uc 1 . 1 0 :2:0 
 `uc 1 LA2 1 0 :1:2 
 ]
-[s S152 . 1 `uc 1 . 1 0 :3:0 
+[s S168 . 1 `uc 1 . 1 0 :3:0 
 `uc 1 LA3 1 0 :1:3 
 ]
-[s S155 . 1 `uc 1 . 1 0 :4:0 
+[s S171 . 1 `uc 1 . 1 0 :4:0 
 `uc 1 LA4 1 0 :1:4 
 ]
-[s S158 . 1 `uc 1 . 1 0 :5:0 
+[s S174 . 1 `uc 1 . 1 0 :5:0 
 `uc 1 LA5 1 0 :1:5 
 ]
-[s S161 . 1 `uc 1 . 1 0 :6:0 
+[s S177 . 1 `uc 1 . 1 0 :6:0 
 `uc 1 LA6 1 0 :1:6 
 ]
-[s S164 . 1 `uc 1 . 1 0 :7:0 
+[s S180 . 1 `uc 1 . 1 0 :7:0 
 `uc 1 LA7 1 0 :1:7 
 ]
-[u S167 . 1 `S135 1 . 1 0 `S144 1 . 1 0 `S146 1 . 1 0 `S149 1 . 1 0 `S152 1 . 1 0 `S155 1 . 1 0 `S158 1 . 1 0 `S161 1 . 1 0 `S164 1 . 1 0 ]
-[v _LATAbits LATAbits `VES167  1 e 1 @3977 ]
+[u S183 . 1 `S151 1 . 1 0 `S160 1 . 1 0 `S162 1 . 1 0 `S165 1 . 1 0 `S168 1 . 1 0 `S171 1 . 1 0 `S174 1 . 1 0 `S177 1 . 1 0 `S180 1 . 1 0 ]
+[v _LATAbits LATAbits `VES183  1 e 1 @3977 ]
 "1094
 [v _TRISA TRISA `VEuc  1 e 1 @3986 ]
 "1315
 [v _TRISB TRISB `VEuc  1 e 1 @3987 ]
 "1536
 [v _TRISC TRISC `VEuc  1 e 1 @3988 ]
-[s S380 . 1 `uc 1 TX9D 1 0 :1:0 
+[s S719 . 1 `uc 1 TMR1IF 1 0 :1:0 
+`uc 1 TMR2IF 1 0 :1:1 
+`uc 1 CCP1IF 1 0 :1:2 
+`uc 1 SSPIF 1 0 :1:3 
+`uc 1 TXIF 1 0 :1:4 
+`uc 1 RCIF 1 0 :1:5 
+`uc 1 ADIF 1 0 :1:6 
+]
+"1918
+[s S727 . 1 `uc 1 . 1 0 :5:0 
+`uc 1 RC1IF 1 0 :1:5 
+]
+[s S730 . 1 `uc 1 . 1 0 :4:0 
+`uc 1 TX1IF 1 0 :1:4 
+]
+[u S733 . 1 `S719 1 . 1 0 `S727 1 . 1 0 `S730 1 . 1 0 ]
+[v _PIR1bits PIR1bits `VES733  1 e 1 @3998 ]
+[s S419 . 1 `uc 1 TX9D 1 0 :1:0 
 `uc 1 TRMT 1 0 :1:1 
 `uc 1 BRGH 1 0 :1:2 
 `uc 1 SENDB 1 0 :1:3 
@@ -171,47 +236,88 @@
 `uc 1 CSRC 1 0 :1:7 
 ]
 "2587
-[s S389 . 1 `uc 1 . 1 0 :2:0 
+[s S428 . 1 `uc 1 . 1 0 :2:0 
 `uc 1 BRGH1 1 0 :1:2 
 ]
-[s S392 . 1 `uc 1 . 1 0 :7:0 
+[s S431 . 1 `uc 1 . 1 0 :7:0 
 `uc 1 CSRC1 1 0 :1:7 
 ]
-[s S395 . 1 `uc 1 . 1 0 :3:0 
+[s S434 . 1 `uc 1 . 1 0 :3:0 
 `uc 1 SENDB1 1 0 :1:3 
 ]
-[s S398 . 1 `uc 1 . 1 0 :4:0 
+[s S437 . 1 `uc 1 . 1 0 :4:0 
 `uc 1 SYNC1 1 0 :1:4 
 ]
-[s S401 . 1 `uc 1 . 1 0 :1:0 
+[s S440 . 1 `uc 1 . 1 0 :1:0 
 `uc 1 TRMT1 1 0 :1:1 
 ]
-[s S404 . 1 `uc 1 . 1 0 :6:0 
+[s S443 . 1 `uc 1 . 1 0 :6:0 
 `uc 1 TX91 1 0 :1:6 
 ]
-[s S407 . 1 `uc 1 TX9D1 1 0 :1:0 
+[s S446 . 1 `uc 1 TX9D1 1 0 :1:0 
 ]
-[s S409 . 1 `uc 1 . 1 0 :5:0 
+[s S448 . 1 `uc 1 . 1 0 :5:0 
 `uc 1 TXEN1 1 0 :1:5 
 ]
-[s S412 . 1 `uc 1 . 1 0 :6:0 
+[s S451 . 1 `uc 1 . 1 0 :6:0 
 `uc 1 TX8_9 1 0 :1:6 
 ]
-[s S415 . 1 `uc 1 TXD8 1 0 :1:0 
+[s S454 . 1 `uc 1 TXD8 1 0 :1:0 
 ]
-[u S417 . 1 `S380 1 . 1 0 `S389 1 . 1 0 `S392 1 . 1 0 `S395 1 . 1 0 `S398 1 . 1 0 `S401 1 . 1 0 `S404 1 . 1 0 `S407 1 . 1 0 `S409 1 . 1 0 `S412 1 . 1 0 `S415 1 . 1 0 ]
-[v _TXSTAbits TXSTAbits `VES417  1 e 1 @4012 ]
+[u S456 . 1 `S419 1 . 1 0 `S428 1 . 1 0 `S431 1 . 1 0 `S434 1 . 1 0 `S437 1 . 1 0 `S440 1 . 1 0 `S443 1 . 1 0 `S446 1 . 1 0 `S448 1 . 1 0 `S451 1 . 1 0 `S454 1 . 1 0 ]
+[v _TXSTAbits TXSTAbits `VES456  1 e 1 @4012 ]
 "3776
 [v _ADCON1 ADCON1 `VEuc  1 e 1 @4033 ]
 "3866
 [v _ADCON0 ADCON0 `VEuc  1 e 1 @4034 ]
+[s S683 . 1 `uc 1 SEN 1 0 :1:0 
+`uc 1 RSEN 1 0 :1:1 
+`uc 1 PEN 1 0 :1:2 
+`uc 1 RCEN 1 0 :1:3 
+`uc 1 ACKEN 1 0 :1:4 
+`uc 1 ACKDT 1 0 :1:5 
+`uc 1 ACKSTAT 1 0 :1:6 
+`uc 1 GCEN 1 0 :1:7 
+]
+"4027
+[s S692 . 1 `uc 1 . 1 0 :1:0 
+`uc 1 ADMSK1 1 0 :1:1 
+`uc 1 ADMSK2 1 0 :1:2 
+`uc 1 ADMSK3 1 0 :1:3 
+`uc 1 ADMSK4 1 0 :1:4 
+`uc 1 ADMSK5 1 0 :1:5 
+]
+[u S699 . 1 `S683 1 . 1 0 `S692 1 . 1 0 ]
+[v _SSPCON2bits SSPCON2bits `VES699  1 e 1 @4037 ]
+"4096
+[v _SSPCON1 SSPCON1 `VEuc  1 e 1 @4038 ]
+[s S655 . 1 `uc 1 SSPM 1 0 :4:0 
+`uc 1 CKP 1 0 :1:4 
+`uc 1 SSPEN 1 0 :1:5 
+`uc 1 SSPOV 1 0 :1:6 
+`uc 1 WCOL 1 0 :1:7 
+]
+"4116
+[s S661 . 1 `uc 1 SSPM0 1 0 :1:0 
+`uc 1 SSPM1 1 0 :1:1 
+`uc 1 SSPM2 1 0 :1:2 
+`uc 1 SSPM3 1 0 :1:3 
+]
+[u S666 . 1 `S655 1 . 1 0 `S661 1 . 1 0 ]
+[v _SSPCON1bits SSPCON1bits `VES666  1 e 1 @4038 ]
+"4165
+[v _SSPSTAT SSPSTAT `VEuc  1 e 1 @4039 ]
+"4396
+[v _SSPADD SSPADD `VEuc  1 e 1 @4040 ]
+"4402
+[v _SSPBUF SSPBUF `VEuc  1 e 1 @4041 ]
 "5682
 [v _INTCON2 INTCON2 `VEuc  1 e 1 @4081 ]
-[s S344 . 1 `uc 1 . 1 0 :7:0 
+[s S383 . 1 `uc 1 . 1 0 :7:0 
 `uc 1 NOT_RBPU 1 0 :1:7 
 ]
 "5707
-[s S347 . 1 `uc 1 RBIP 1 0 :1:0 
+[s S386 . 1 `uc 1 RBIP 1 0 :1:0 
 `uc 1 . 1 0 :1:1 
 `uc 1 TMR0IP 1 0 :1:2 
 `uc 1 . 1 0 :1:3 
@@ -220,14 +326,14 @@
 `uc 1 INTEDG0 1 0 :1:6 
 `uc 1 nRBPU 1 0 :1:7 
 ]
-[s S356 . 1 `uc 1 . 1 0 :7:0 
+[s S395 . 1 `uc 1 . 1 0 :7:0 
 `uc 1 RBPU 1 0 :1:7 
 ]
-[u S359 . 1 `S344 1 . 1 0 `S347 1 . 1 0 `S356 1 . 1 0 ]
-[v _INTCON2bits INTCON2bits `VES359  1 e 1 @4081 ]
+[u S398 . 1 `S383 1 . 1 0 `S386 1 . 1 0 `S395 1 . 1 0 ]
+[v _INTCON2bits INTCON2bits `VES398  1 e 1 @4081 ]
 "5751
 [v _INTCON INTCON `VEuc  1 e 1 @4082 ]
-[s S292 . 1 `uc 1 RBIF 1 0 :1:0 
+[s S331 . 1 `uc 1 RBIF 1 0 :1:0 
 `uc 1 INT0IF 1 0 :1:1 
 `uc 1 TMR0IF 1 0 :1:2 
 `uc 1 RBIE 1 0 :1:3 
@@ -237,7 +343,7 @@
 `uc 1 GIE_GIEH 1 0 :1:7 
 ]
 "5783
-[s S301 . 1 `uc 1 . 1 0 :1:0 
+[s S340 . 1 `uc 1 . 1 0 :1:0 
 `uc 1 INT0F 1 0 :1:1 
 `uc 1 T0IF 1 0 :1:2 
 `uc 1 . 1 0 :1:3 
@@ -246,23 +352,210 @@
 `uc 1 PEIE 1 0 :1:6 
 `uc 1 GIE 1 0 :1:7 
 ]
-[s S310 . 1 `uc 1 . 1 0 :6:0 
+[s S349 . 1 `uc 1 . 1 0 :6:0 
 `uc 1 GIEL 1 0 :1:6 
 `uc 1 GIEH 1 0 :1:7 
 ]
-[u S314 . 1 `S292 1 . 1 0 `S301 1 . 1 0 `S310 1 . 1 0 ]
-[v _INTCONbits INTCONbits `VES314  1 e 1 @4082 ]
-"51 C:\Users\Jim\Documents\Work\Manchester 18F/main.c
+[u S353 . 1 `S331 1 . 1 0 `S340 1 . 1 0 `S349 1 . 1 0 ]
+[v _INTCONbits INTCONbits `VES353  1 e 1 @4082 ]
+"70 C:\Users\Jim\Documents\Work\Manchester 18F/main.c
 [v _main main `(v  1 e 1 0 ]
 {
-"52
-[v main@numBytesToSend numBytesToSend `uc  1 a 1 18 ]
-"91
+"73
+[v main@accelerometerBuffer accelerometerBuffer `[6]uc  1 a 6 40 ]
+[u S526 . 2 `[2]uc 1 byte 2 0 `us 1 integer 2 0 ]
+"85
+[v main@convert convert `S526  1 a 2 55 ]
+"78
+[v main@rawVectz rawVectz `s  1 a 2 50 ]
+[v main@rawVecty rawVecty `s  1 a 2 48 ]
+[v main@rawVectx rawVectx `s  1 a 2 46 ]
+"71
+[v main@numBytesToSend numBytesToSend `us  1 a 2 38 ]
+"72
+[v main@i i `uc  1 a 1 57 ]
+"77
+[v main@interruptSource interruptSource `uc  1 a 1 54 ]
+"75
+[v main@motionDetection motionDetection `uc  1 a 1 53 ]
+"76
+[v main@sysModRegister sysModRegister `uc  1 a 1 52 ]
+"79
+[v main@initResult initResult `uc  1 a 1 37 ]
+"151
 } 0
-"93
+"17 C:\Users\Jim\Documents\Work\Manchester 18F/transmitPacket.c
+[v _xmitPacket xmitPacket `(v  1 e 1 0 ]
+{
+"19
+[v xmitPacket@index index `us  1 a 2 18 ]
+"18
+[v xmitPacket@delayLoop delayLoop `uc  1 a 1 21 ]
+[v xmitPacket@delayTime delayTime `uc  1 a 1 20 ]
+"17
+[v xmitPacket@numBytes numBytes `us  1 p 2 14 ]
+[v xmitPacket@ptrDelay ptrDelay `*.39uc  1 p 2 16 ]
+"60
+} 0
+"62
+[v _xmitBreak xmitBreak `(v  1 e 1 0 ]
+{
+"63
+[v xmitBreak@delayLoop delayLoop `uc  1 a 1 16 ]
+[v xmitBreak@delayTime delayTime `uc  1 a 1 15 ]
+[v xmitBreak@numStartPulses numStartPulses `uc  1 a 1 14 ]
+"115
+} 0
+"194 C:\Users\Jim\Documents\Work\Manchester 18F/MMA8452_18F.c
+[v _initialize_I2C initialize_I2C `(v  1 e 1 0 ]
+{
+"207
+} 0
+"102
+[v _initMMA8452 initMMA8452 `(uc  1 e 1 0 ]
+{
+"103
+[v initMMA8452@accelData accelData `[4]uc  1 a 4 32 ]
+"104
+[v initMMA8452@commandByte commandByte `uc  1 a 1 36 ]
+"102
+[v initMMA8452@F2758 F2758 `[4]uc  1 s 4 F2758 ]
+"166
+} 0
+"53
+[v _writeByteToRegister writeByteToRegister `(uc  1 e 1 0 ]
+{
+[v writeByteToRegister@deviceID deviceID `uc  1 a 1 wreg ]
+[v writeByteToRegister@deviceID deviceID `uc  1 a 1 wreg ]
+[v writeByteToRegister@deviceREGISTER deviceREGISTER `uc  1 p 1 18 ]
+[v writeByteToRegister@dataByte dataByte `uc  1 p 1 19 ]
+"55
+[v writeByteToRegister@deviceID deviceID `uc  1 a 1 20 ]
+"80
+} 0
+"82
+[v _readRegisters readRegisters `(uc  1 e 1 0 ]
+{
+[v readRegisters@deviceID deviceID `uc  1 a 1 wreg ]
+"83
+[v readRegisters@i i `uc  1 a 1 31 ]
+"82
+[v readRegisters@deviceID deviceID `uc  1 a 1 wreg ]
+[v readRegisters@deviceREGISTER deviceREGISTER `uc  1 p 1 20 ]
+[v readRegisters@numRegisters numRegisters `uc  1 p 1 21 ]
+[v readRegisters@registerPtr registerPtr `*.39uc  1 p 2 22 ]
+"85
+[v readRegisters@deviceID deviceID `uc  1 a 1 30 ]
+"100
+} 0
+"33
+[v _setRegister setRegister `(uc  1 e 1 0 ]
+{
+[v setRegister@deviceID deviceID `uc  1 a 1 wreg ]
+[v setRegister@deviceID deviceID `uc  1 a 1 wreg ]
+[v setRegister@deviceREGISTER deviceREGISTER `uc  1 p 1 18 ]
+"35
+[v setRegister@deviceID deviceID `uc  1 a 1 19 ]
+"51
+} 0
+"19
+[v _sendREADcommand sendREADcommand `(uc  1 e 1 0 ]
+{
+[v sendREADcommand@deviceID deviceID `uc  1 a 1 wreg ]
+[v sendREADcommand@deviceID deviceID `uc  1 a 1 wreg ]
+"21
+[v sendREADcommand@deviceID deviceID `uc  1 a 1 18 ]
+"31
+} 0
+"223
+[v _i2c_Start i2c_Start `(v  1 e 1 0 ]
+{
+"227
+} 0
+"257
+[v _i2c_SendControlByte i2c_SendControlByte `(uc  1 e 1 0 ]
+{
+[v i2c_SendControlByte@controlByte controlByte `uc  1 a 1 wreg ]
+"258
+[v i2c_SendControlByte@outByte outByte `uc  1 a 1 17 ]
+"257
+[v i2c_SendControlByte@controlByte controlByte `uc  1 a 1 wreg ]
+[v i2c_SendControlByte@direction direction `uc  1 p 1 15 ]
+"260
+[v i2c_SendControlByte@controlByte controlByte `uc  1 a 1 16 ]
+"262
+} 0
+"244
+[v _i2c_SendByte i2c_SendByte `(uc  1 e 1 0 ]
+{
+[v i2c_SendByte@byte byte `uc  1 a 1 wreg ]
+[v i2c_SendByte@byte byte `uc  1 a 1 wreg ]
+"246
+[v i2c_SendByte@byte byte `uc  1 a 1 14 ]
+"251
+} 0
+"266
+[v _i2c_GetAcknowledge i2c_GetAcknowledge `(uc  1 e 1 0 ]
+{
+"267
+[v i2c_GetAcknowledge@ack ack `uc  1 a 1 14 ]
+"272
+} 0
+"214
+[v _i2c_Stop i2c_Stop `(v  1 e 1 0 ]
+{
+"218
+} 0
+"293
+[v _i2c_SendAcknowledge i2c_SendAcknowledge `(v  1 e 1 0 ]
+{
+[v i2c_SendAcknowledge@status status `uc  1 a 1 wreg ]
+[v i2c_SendAcknowledge@status status `uc  1 a 1 wreg ]
+[v i2c_SendAcknowledge@status status `uc  1 a 1 14 ]
+"303
+} 0
+"276
+[v _i2c_ReadByte i2c_ReadByte `(uc  1 e 1 0 ]
+{
+"277
+[v i2c_ReadByte@byte byte `uc  1 a 1 14 ]
+"284
+} 0
+"153 C:\Users\Jim\Documents\Work\Manchester 18F/main.c
 [v _init init `(v  1 e 1 0 ]
 {
-"145
+"206
+} 0
+"172 C:\Users\Jim\Documents\Work\Manchester 18F/MMA8452_18F.c
+[v _getTwosComplement getTwosComplement `(s  1 e 2 0 ]
+{
+[v getTwosComplement@MSBbyte MSBbyte `uc  1 a 1 wreg ]
+"173
+[v getTwosComplement@value value `s  1 a 2 20 ]
+"172
+[v getTwosComplement@MSBbyte MSBbyte `uc  1 a 1 wreg ]
+[v getTwosComplement@LSBbyte LSBbyte `uc  1 p 1 14 ]
+"176
+[v getTwosComplement@MSBbyte MSBbyte `uc  1 a 1 19 ]
+"189
+} 0
+"223 C:\Users\Jim\Documents\Work\Manchester 18F/main.c
+[v _createDataPacket createDataPacket `(us  1 e 2 0 ]
+{
+"225
+[v createDataPacket@packetIndex packetIndex `us  1 a 2 27 ]
+[v createDataPacket@dataIndex dataIndex `us  1 a 2 21 ]
+"224
+[v createDataPacket@state state `uc  1 a 1 26 ]
+[v createDataPacket@byteMask byteMask `uc  1 a 1 25 ]
+[v createDataPacket@i i `uc  1 a 1 24 ]
+[v createDataPacket@dataBit dataBit `uc  1 a 1 23 ]
+[v createDataPacket@previousDataBit previousDataBit `uc  1 a 1 20 ]
+"223
+[v createDataPacket@ptrData ptrData `*.39uc  1 p 2 14 ]
+[v createDataPacket@numDataBytes numDataBytes `us  1 p 2 16 ]
+[v createDataPacket@ptrPacket ptrPacket `*.39uc  1 p 2 18 ]
+"274
 } 0
 "12 C:\Users\Jim\Documents\Work\Manchester 18F/delay.c
 [v _DelayMs DelayMs `(v  1 e 1 0 ]
@@ -275,8 +568,31 @@
 [v DelayMs@count count `us  1 p 2 14 ]
 "20
 } 0
-"149 C:\Users\Jim\Documents\Work\Manchester 18F/main.c
+"107 C:\Users\Jim\Documents\Work\Manchester 18F/CRC Check.c
+[v _CRCcalculate CRCcalculate `(us  1 e 2 0 ]
+{
+"108
+[v CRCcalculate@CRCresult CRCresult `us  1 a 2 30 ]
+"109
+[v CRCcalculate@i i `uc  1 a 1 32 ]
+"107
+[v CRCcalculate@message message `*.39uc  1 p 2 27 ]
+[v CRCcalculate@nBytes nBytes `uc  1 p 1 29 ]
+"119
+} 0
+"91
+[v _update_crc_16 update_crc_16 `(us  1 e 2 0 ]
+{
+"92
+[v update_crc_16@shortVal shortVal `us  1 a 2 25 ]
+[v update_crc_16@tmp tmp `us  1 a 2 23 ]
+"91
+[v update_crc_16@crc crc `us  1 p 2 14 ]
+[v update_crc_16@nextVal nextVal `uc  1 p 1 16 ]
+"98
+} 0
+"210 C:\Users\Jim\Documents\Work\Manchester 18F/main.c
 [v _isr isr `II(v  1 s 1 isr ]
 {
-"151
+"220
 } 0

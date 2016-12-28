@@ -1,5 +1,5 @@
 Version 3.2 HI-TECH Software Intermediate Code
-[; ;delay.h: 11: extern void DelayMs(unsigned short);
+[; ;delay.h: 16: extern void DelayMs(unsigned short);
 "12 ../delay.c
 [v _DelayMs `(v ~T0 @X0 1 ef1`us ]
 {

@@ -1,4 +1,4 @@
-#include <XC.h>
+#include <xc.h>
 
 void xmitData(unsigned char *ptrData, unsigned char numBytes);
 void xmitStartSequence(void);

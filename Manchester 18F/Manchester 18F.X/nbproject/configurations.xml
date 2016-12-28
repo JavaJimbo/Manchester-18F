@@ -5,6 +5,7 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>../../../../../../Program Files (x86)/Microchip/mplabc18/v3.47/h/p18f2520.h</itemPath>
+      <itemPath>../MMA8452_18F.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -14,8 +15,10 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>../main.c</itemPath>
-      <itemPath>../xmitPacket.asm</itemPath>
       <itemPath>../delay.c</itemPath>
+      <itemPath>../CRC Check.c</itemPath>
+      <itemPath>../MMA8452_18F.c</itemPath>
+      <itemPath>../transmitPacket.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -136,6 +139,7 @@
                   value="Press to browse for a specific firmware version"/>
         <property key="ToolFirmwareOption.UseLatestFirmware" value="true"/>
         <property key="debugoptions.useswbreakpoints" value="false"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="false"/>

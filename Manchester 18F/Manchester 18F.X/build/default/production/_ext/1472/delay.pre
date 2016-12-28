@@ -1,7 +1,7 @@
 
 # 1 "../delay.c"
 
-# 11 "../delay.h"
+# 16 "../delay.h"
 extern void DelayMs(unsigned short);
 
 # 11 "../delay.c"
