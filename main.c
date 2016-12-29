@@ -22,6 +22,7 @@
  *          Timeout in WAKE mode before going back to SLEEP is about 21 seconds.
  *  12-28-16: Tested with Olimex Pinguino 220, using two byte CRC and seven data bytes.
  *          Implemented single byte fast read mode
+ *  12-29-16: Swapped in CRC-7 check. 
  */
 
 #include <xc.h>
@@ -52,12 +53,14 @@ void init(void);
 
 extern void xmitPacket(unsigned short numBytes, unsigned char *ptrDelay);
 extern void xmitBreak(void);
+extern unsigned char getCRC7(unsigned char *ptrMessage, short numBytes);
 
 #define MAXPACKETBYTES 1024
 unsigned char arrDataPacket[MAXPACKETBYTES];
 #define MAX_DATA_BYTES 64
 unsigned char commandBuffer[MAX_DATA_BYTES];   
 unsigned short createDataPacket(unsigned char *ptrData, unsigned short numDataBytes, unsigned char *ptrPacket);
+
 
 #define HIGH_STATE 1
 #define LOW_STATE 0
@@ -108,14 +111,14 @@ union {
         //rawVectz = getTwosComplement(accelerometerBuffer[2], accelerometerBuffer[3]);
         //rawVecty = getTwosComplement(accelerometerBuffer[4], accelerometerBuffer[5]);              
         
-#define NUM_DATA_BYTES 4 // was 7
+#define NUM_DATA_BYTES 3
         i = 0; 
         commandBuffer[i++] = NUM_DATA_BYTES;             
         
-        commandBuffer[i++] = motionDetection;
-        motionDetection = 0x00;                
-        
         /*
+        commandBuffer[i++] = motionDetection;
+        motionDetection = 0x00;                        
+       
         convert.integer = rawVectx;
         commandBuffer[i++] = convert.byte[0];
         commandBuffer[i++] = convert.byte[1];        
@@ -133,10 +136,11 @@ union {
         commandBuffer[i++] = accelerometerBuffer[1];
         commandBuffer[i++] = accelerometerBuffer[2];        
         
-        convert.integer = CRCcalculate(&commandBuffer[1], NUM_DATA_BYTES);
-        commandBuffer[i++] = convert.byte[0];
-        commandBuffer[i++] = convert.byte[1];
+        // convert.integer = CRCcalculate(&commandBuffer[1], NUM_DATA_BYTES);
+        // commandBuffer[i++] = convert.byte[0];
+        // commandBuffer[i++] = convert.byte[1];
         
+        commandBuffer[i++] = getCRC7(commandBuffer, i);        
         numBytesToSend = createDataPacket(commandBuffer, i, arrDataPacket);       
 
         TRIG_OUT = 1;
