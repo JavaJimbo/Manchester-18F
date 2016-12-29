@@ -20,6 +20,8 @@
  *  12-12-16: Enabled SLEEP mode on MMA8452Q. Seems to draw about 120 uA when sleeping.
  *          Sampling rate in WAKE mode set to 100 Hz, SLEEP mode is 12.5 Hz.
  *          Timeout in WAKE mode before going back to SLEEP is about 21 seconds.
+ *  12-28-16: Tested with Olimex Pinguino 220, using two byte CRC and seven data bytes.
+ *          Implemented single byte fast read mode
  */
 
 #include <xc.h>
@@ -42,9 +44,6 @@
 #define PUSHin 		PORTBbits.RB0
 #define TRIG_OUT    PORTBbits.RB5
 
-// #define ORIENTATION_DETECTION
-#define MOTION_DETECTION
-
 #define ORIENTATION_BIT 0x10
 #define MOTION_BIT 0x04
 #define INTERRUPT_STATUS ORIENTATION_BIT
@@ -65,26 +64,17 @@ unsigned short createDataPacket(unsigned char *ptrData, unsigned short numDataBy
 
 extern unsigned short CRCcalculate (unsigned char *message, unsigned char nBytes);
 
-#define MAX_I2C_REGISTERS 6
 unsigned char PORTBreg;
 unsigned char pushFlag = FALSE;
 
 void main() {
 unsigned short numBytesToSend;
 unsigned char i, j;  
-unsigned char command = 0;    
 unsigned char accelerometerBuffer[MAX_I2C_REGISTERS];
 
-#ifdef ORIENTATION_DETECTION
-unsigned char orientationData = 0;
-#endif
-
-#ifdef MOTION_DETECTION
 unsigned char motionDetection = 0;
 unsigned char sysModRegister = 0;
-#endif
-
-unsigned char interruptSource = 0, intDataReg = 0;
+unsigned char interruptSource = 0;
 short rawVectx, rawVecty, rawVectz;
 unsigned char initResult = 0;
 
@@ -97,48 +87,35 @@ union {
     init();
     initialize_I2C();
     initResult = initMMA8452();
+    DelayMs(100);
     
-    while(1){                        
-        
-#ifdef ORIENTATION_DETECTION       
-        do {
-            readRegisters(ACCELEROMETER_ID, 0x0C, 1, &interruptSource);     // Read Interrupt Source register            
-            if (interruptSource & 0x10)                                     // If this is an orientation interrupt,                  
-                readRegisters(ACCELEROMETER_ID, 0x10, 1, &orientationData); // then read orientation status register
-        } while (interruptSource != 0);
-#endif
-        
-#ifdef MOTION_DETECTION
+    while(1){                       
         do {
             readRegisters(ACCELEROMETER_ID, 0x0C, 1, &interruptSource);     // Read Interrupt Source register            
             if (interruptSource){                                           
                 readRegisters(ACCELEROMETER_ID, 0x0B, 1, &sysModRegister);  // Clear Sys Mod Register
                 readRegisters(ACCELEROMETER_ID, 0x16, 1, &motionDetection); // If this is an motion detection interrupt, then read motion register
             }
-        } while (interruptSource != 0);
-#endif        
+        } while (interruptSource != 0);        
         
         PDownOut = 0;
         TX_OUT = 0;        
-        Sleep();    
+        Sleep();           
+
         
         readRegisters(ACCELEROMETER_ID, 0x01, MAX_I2C_REGISTERS, accelerometerBuffer);
-        rawVectx = convertValue(accelerometerBuffer[0], accelerometerBuffer[1]);
-        rawVectz = convertValue(accelerometerBuffer[2], accelerometerBuffer[3]);
-        rawVecty = convertValue(accelerometerBuffer[4], accelerometerBuffer[5]);              
+        //rawVectx = getTwosComplement(accelerometerBuffer[0], accelerometerBuffer[1]);
+        //rawVectz = getTwosComplement(accelerometerBuffer[2], accelerometerBuffer[3]);
+        //rawVecty = getTwosComplement(accelerometerBuffer[4], accelerometerBuffer[5]);              
         
-#define NUM_DATA_BYTES 7
+#define NUM_DATA_BYTES 4 // was 7
         i = 0; 
-        commandBuffer[i++] = NUM_DATA_BYTES;                 
-
-#ifdef ORIENTATION_DETECTION         
-        commandBuffer[i++] = orientationData;
-#endif        
+        commandBuffer[i++] = NUM_DATA_BYTES;             
         
-#ifdef MOTION_DETECTION         
         commandBuffer[i++] = motionDetection;
-        motionDetection = 0x00;
-#endif                
+        motionDetection = 0x00;                
+        
+        /*
         convert.integer = rawVectx;
         commandBuffer[i++] = convert.byte[0];
         commandBuffer[i++] = convert.byte[1];        
@@ -150,17 +127,17 @@ union {
         convert.integer = rawVecty;
         commandBuffer[i++] = convert.byte[0];
         commandBuffer[i++] = convert.byte[1];                
+        */
 
+        commandBuffer[i++] = accelerometerBuffer[0];
+        commandBuffer[i++] = accelerometerBuffer[1];
+        commandBuffer[i++] = accelerometerBuffer[2];        
+        
         convert.integer = CRCcalculate(&commandBuffer[1], NUM_DATA_BYTES);
         commandBuffer[i++] = convert.byte[0];
         commandBuffer[i++] = convert.byte[1];
         
         numBytesToSend = createDataPacket(commandBuffer, i, arrDataPacket);       
-        
-        //xmitStartSequence();
-        //xmitData(commandBuffer, 8);
-        //xmitStopSequence();
-        //TRIG_OUT = 0;
 
         TRIG_OUT = 1;
         PDownOut = 1;
@@ -170,6 +147,11 @@ union {
         TX_OUT = 0;
         TRIG_OUT = 0;
         
+        //do {
+        //    DelayMs(10);        
+        //    ready = readRegisters(ACCELEROMETER_ID, 0x00, 1, accelerometerBuffer);
+        //} while (!(ready & 0b00001000));        
+                
         if (pushFlag){
             do {
                 DelayMs(20);
@@ -178,6 +160,7 @@ union {
             while (!PUSHin);        
             pushFlag = FALSE;
         }
+        
     }
 }
 
@@ -312,4 +295,3 @@ void putch(unsigned char TxByte) {
 }
 */
 
-// if (!writeByteToRegister(ACCELEROMETER_ID, 0x16, )) return (FALSE); // Register 0x16 Motion/Freefall Source Detection                

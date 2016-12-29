@@ -10,7 +10,7 @@
 #define	MMA8452_H
 
 #define MAXBUFFER 64
-#define MAX_I2C_REGISTERS 6
+#define MAX_I2C_REGISTERS 3
 
 //Define a few of the registers that we will be accessing on the MMA8452
 #define OUT_X_MSB 0x01
@@ -62,7 +62,7 @@ extern unsigned char setRegister(unsigned char deviceID, unsigned char deviceREG
 extern unsigned char sendREADcommand(unsigned char deviceID);
 extern unsigned char readRegisters(unsigned char deviceID, unsigned char deviceREGISTER, unsigned char numRegisters, unsigned char *registerPtr);
 extern unsigned char writeByteToRegister(unsigned char deviceID, unsigned char deviceREGISTER, unsigned char dataByte);
-short convertValue(unsigned char MSBbyte, unsigned char LSBbyte);
+short getTwosComplement(unsigned char MSBbyte, unsigned char LSBbyte);
 unsigned char initMMA8452(void);
 unsigned char resetMMA8452(void);
 
