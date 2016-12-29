@@ -1,7 +1,8 @@
 /* MMA8452_18F.c - I2C communication routines for accelerometer
  * Adapted for 18F series PICs
  *
- * 12-9-16: Adapted for Magic Wand using Linx and Manchester coding
+ * 12-9-16: 	Adapted for Magic Wand using Linx and Manchester coding
+ * 12-28-16: 	Set Fast Read mode bit in register 0x2A
  * 
  */
 #include "MMA8452_18F.h"
@@ -12,9 +13,6 @@
 #define TRUE true
 #define FALSE false
 
-// #define ORIENTATION_DETECTION
-#define MOTION_DETECTION
-#define SLEEP_MODE 
 
 // This routine initiates I2C reads and writes
 // It sends a START, then the DEVICE address,
@@ -102,7 +100,6 @@ unsigned char readRegisters(unsigned char deviceID, unsigned char deviceREGISTER
     return (i);
 }
 
-#ifdef MOTION_DETECTION
 unsigned char initMMA8452(void) {
     unsigned char accelData[4] = {0, 0, 0, 0};
     unsigned char commandByte;
@@ -125,9 +122,8 @@ unsigned char initMMA8452(void) {
     // 3) Set sample rates in register 0x2A:
     if (!readRegisters(ACCELEROMETER_ID, 0x2A, 1, accelData)) return (FALSE); // Read System Control Register #1
     commandByte = accelData[0];
-    commandByte &= 0x5E; // Clear sample bits
-    // commandByte |= 0x58; // SLEEP = 01 (6.25 Hz), WAKE = 011(100 Hz)
-    commandByte |= 0b01011000; // SLEEP = 01 (12.5 Hz), WAKE = 011(100 Hz)
+    commandByte &= 0x5E; // Clear sample bits    
+    commandByte |= 0b01011010; // SLEEP = 01 (12.5 Hz), WAKE = 011(100 Hz), Bit #1 = 1 for FAST READ mode (single data byte for each axis)
     if (!writeByteToRegister(ACCELEROMETER_ID, 0x2A, commandByte)) return (FALSE);
     
     // 4) In register 0x2B, set the Wake Oversampling Mode to High Resolution (10) 
@@ -168,53 +164,13 @@ unsigned char initMMA8452(void) {
 
     return (TRUE);
 }
-#endif
-
-#ifdef ORIENTATION_DETECTION
-unsigned char initMMA8452(void) {
-    unsigned char accelData[4] = {0, 0, 0, 0};
-    unsigned char commandByte;
-
-    //if (!readRegisters(ACCELEROMETER_ID, WHO_AM_I, 1, accelData)) return (FALSE); // Read WHO_AM_I register
-    //if (accelData[0] != 0x2A) return (FALSE); // WHO_AM_I should always be 0x2A
-
-    if (!readRegisters(ACCELEROMETER_ID, CTRL_REG1, 1, accelData)) return (FALSE); 
-    commandByte = accelData[0];
-    commandByte &= 0xFE; // Set last bit to 0 for STANDBY mode
-    commandByte &= 0xC7; // Clear the sample rate bits
-    commandByte |= 0x18; //Set the sample rate bits to 400 Hz = 0x08, 100 Hz = 0x18, 200 Hz = 0x10, 800 Hz = 0x00, 50 Hz = 0x20
-    if (!writeByteToRegister(ACCELEROMETER_ID, CTRL_REG1, commandByte)) return (FALSE);
-        
-    if (!writeByteToRegister(ACCELEROMETER_ID, POWER_MODE, 0b00000000)) return (FALSE);  // Use normal power modes
-    
-       
-    if (!readRegisters(ACCELEROMETER_ID, 0x11, 1, accelData)) return (FALSE); // ORIENTATION SETUP REGISTER
-    commandByte = accelData[0];
-    commandByte |= 0x40; // Set the PL_EN bit in PL_COFIG Register to enable the orientation detection.    
-    if (!writeByteToRegister(ACCELEROMETER_ID, 0x11, commandByte)) return (FALSE);            
-    
-    // Set up interrupts for orientation detection
-    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2D, 0b00010000)) return (FALSE);  // Interrupt enable register: use orientation interrupts
-    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2E, 0b00010000)) return (FALSE);  // Interrupt configuration register:  use INT1 PIN
-    if (!writeByteToRegister(ACCELEROMETER_ID, 0x2C, 0x22)) return (FALSE);         //  Interrupt control: int pin is active high, orientation wakeup enabled
-    if (!readRegisters(ACCELEROMETER_ID, INTERRUPT_SOURCE, 1, accelData)) return (FALSE);  // Do a dummy read to make sure register is cleared
-    if (!writeByteToRegister(ACCELEROMETER_ID, PL_DEBOUNCE_COUNTER, 0x01)) return (FALSE); // This sets the debounce counter to 100 ms at 50 Hz was 0x05
-    
-    if (!writeByteToRegister(ACCELEROMETER_ID, XYZ_DATA_CFG, 0x00)) return (FALSE); // Set range to 2 G, disable high pass filtering
-    
-
-    if (!readRegisters(ACCELEROMETER_ID, CTRL_REG1, 1, accelData)) return (FALSE); // Put in ACTIVE mode
-    commandByte = accelData[0];
-    commandByte |= 0x01;
-    if (!writeByteToRegister(ACCELEROMETER_ID, CTRL_REG1, commandByte)) return (FALSE);
-
-    return (TRUE);
-}
-#endif
 
 
 
-short convertValue(unsigned char MSBbyte, unsigned char LSBbyte) {
+// This routine combines LSB and MSB data bytes from X,Y, or Z register
+// to create a single 16 bit twos complement signed integer
+/*
+short getTwosComplement(unsigned char MSBbyte, unsigned char LSBbyte) {
     short value;
 
     // Combine high and low bytes
@@ -232,7 +188,7 @@ short convertValue(unsigned char MSBbyte, unsigned char LSBbyte) {
     }
     return (value);
 }
-
+*/
 
 //	This routine sets up I2C functions for master mode
 
