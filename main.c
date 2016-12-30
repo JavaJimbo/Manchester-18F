@@ -23,6 +23,7 @@
  *  12-28-16: Tested with Olimex Pinguino 220, using two byte CRC and seven data bytes.
  *          Implemented single byte fast read mode
  *  12-29-16: Swapped in CRC-7 check. 
+ *          Added Parity check to CRC-7 to get CRC-8
  */
 
 #include <xc.h>
@@ -53,14 +54,13 @@ void init(void);
 
 extern void xmitPacket(unsigned short numBytes, unsigned char *ptrDelay);
 extern void xmitBreak(void);
-extern unsigned char getCRC7(unsigned char *ptrMessage, short numBytes);
+extern unsigned char getCRC8(unsigned char *ptrMessage, short numBytes);
 
 #define MAXPACKETBYTES 1024
 unsigned char arrDataPacket[MAXPACKETBYTES];
 #define MAX_DATA_BYTES 64
 unsigned char commandBuffer[MAX_DATA_BYTES];   
 unsigned short createDataPacket(unsigned char *ptrData, unsigned short numDataBytes, unsigned char *ptrPacket);
-
 
 #define HIGH_STATE 1
 #define LOW_STATE 0
@@ -74,18 +74,17 @@ void main() {
 unsigned short numBytesToSend;
 unsigned char i, j;  
 unsigned char accelerometerBuffer[MAX_I2C_REGISTERS];
-
 unsigned char motionDetection = 0;
 unsigned char sysModRegister = 0;
 unsigned char interruptSource = 0;
-short rawVectx, rawVecty, rawVectz;
+// short rawVectx, rawVecty, rawVectz;
 unsigned char initResult = 0;
+unsigned char parity = 0x00, CRC7result;
 
-    
-union {
-    unsigned char byte[2];
-    unsigned short integer;
-} convert;    
+//union {
+//    unsigned char byte[2];
+//    unsigned short integer;
+//} convert;    
     
     init();
     initialize_I2C();
@@ -104,16 +103,14 @@ union {
         PDownOut = 0;
         TX_OUT = 0;        
         Sleep();           
-
         
         readRegisters(ACCELEROMETER_ID, 0x01, MAX_I2C_REGISTERS, accelerometerBuffer);
         //rawVectx = getTwosComplement(accelerometerBuffer[0], accelerometerBuffer[1]);
         //rawVectz = getTwosComplement(accelerometerBuffer[2], accelerometerBuffer[3]);
         //rawVecty = getTwosComplement(accelerometerBuffer[4], accelerometerBuffer[5]);              
         
-#define NUM_DATA_BYTES 3
         i = 0; 
-        commandBuffer[i++] = NUM_DATA_BYTES;             
+        commandBuffer[i++] = 5;       
         
         /*
         commandBuffer[i++] = motionDetection;
@@ -134,13 +131,14 @@ union {
 
         commandBuffer[i++] = accelerometerBuffer[0];
         commandBuffer[i++] = accelerometerBuffer[1];
-        commandBuffer[i++] = accelerometerBuffer[2];        
+        commandBuffer[i++] = accelerometerBuffer[2];                
         
-        // convert.integer = CRCcalculate(&commandBuffer[1], NUM_DATA_BYTES);
-        // commandBuffer[i++] = convert.byte[0];
-        // commandBuffer[i++] = convert.byte[1];
+        commandBuffer[i++] = getCRC8(commandBuffer, 4);     
+
+        //convert.integer = CRCcalculate (commandBuffer, 4);    
+        //commandBuffer[i++] = convert.byte[0]; 
+        //commandBuffer[i++] = convert.byte[1];
         
-        commandBuffer[i++] = getCRC7(commandBuffer, i);        
         numBytesToSend = createDataPacket(commandBuffer, i, arrDataPacket);       
 
         TRIG_OUT = 1;
