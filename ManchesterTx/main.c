@@ -22,6 +22,11 @@
  *          Timeout in WAKE mode before going back to SLEEP is about 21 seconds.
  *  12-28-16: Tested with Olimex Pinguino 220, using two byte CRC and seven data bytes.
  *  9-8-17: Recompiled & tested with ManchesterRx. Transmits accelerometer data and two byte CRC
+ *  7-15-20: Modified to work for 4800 baud Sparkfun transmitter & receiver.
+ *           USES POLLING, not interrupts 
+ *  7-26-20: Cleaned up, removed accelerometer, added repeats and 100 ms delay.
+ *  7-26-20: Works with Manchester Rx using Sparkfun transmitter and receiver.
+ *          Cleaned up, removed accelerometer, added repeats and 100 ms delay.  
  */  
 #include <xc.h>
 #include <math.h>
@@ -75,8 +80,10 @@ unsigned char accelerometerBuffer[MAX_I2C_REGISTERS];
 unsigned char motionDetection = 0;
 unsigned char sysModRegister = 0;
 unsigned char interruptSource = 0;
-short rawVectx, rawVecty, rawVectz;
+short rawVectx = 123, rawVecty = 333, rawVectz = 222;
 unsigned char initResult = 0;
+short autoCount = 0;
+short CommandNum = 0;
 
     
 union {
@@ -85,33 +92,47 @@ union {
 } convert;    
     
     init();
-    initialize_I2C();
-    initResult = initMMA8452();
+    //initialize_I2C();
+    //initResult = initMMA8452();
     
     while(1){        
+      
+        /*
         do {
             readRegisters(ACCELEROMETER_ID, 0x0C, 1, &interruptSource);     // Read Interrupt Source register            
             if (interruptSource){                                           
                 readRegisters(ACCELEROMETER_ID, 0x0B, 1, &sysModRegister);  // Clear Sys Mod Register
                 readRegisters(ACCELEROMETER_ID, 0x16, 1, &motionDetection); // If this is an motion detection interrupt, then read motion register
             }
-        } while (interruptSource != 0);        
+        } while (interruptSource != 0);      
+*/
+        rawVectx++;
+        rawVecty++;
+        rawVectz++;
         
-        PDownOut = 0;
-        TX_OUT = 0;        
-        Sleep();    
+        if (autoCount) 
+        {
+            autoCount--;
+            DelayMs(100);
+        }
+        else {           
+            CommandNum = 0;
+            PDownOut = 0;
+            TX_OUT = 0;        
+            Sleep();    
+        }
         
+        /*
         readRegisters(ACCELEROMETER_ID, 0x01, MAX_I2C_REGISTERS, accelerometerBuffer);
         rawVectx = getTwosComplement(accelerometerBuffer[0], accelerometerBuffer[1]);
         rawVectz = getTwosComplement(accelerometerBuffer[2], accelerometerBuffer[3]);
         rawVecty = getTwosComplement(accelerometerBuffer[4], accelerometerBuffer[5]);              
+        */
         
-#define NUM_DATA_BYTES 7
-        i = 0; 
-        commandBuffer[i++] = NUM_DATA_BYTES;     
-        
-        commandBuffer[i++] = motionDetection;
-        motionDetection = 0x00;        
+        i = 0;
+        #define NUM_DATA_BYTES 7
+        commandBuffer[i++] = NUM_DATA_BYTES;                
+        commandBuffer[i++] = CommandNum++; // motionDetection;       
         
         convert.integer = rawVectx;
         commandBuffer[i++] = convert.byte[0];
@@ -127,17 +148,20 @@ union {
 
         convert.integer = CRCcalculate(&commandBuffer[1], NUM_DATA_BYTES);
         commandBuffer[i++] = convert.byte[0];
-        commandBuffer[i++] = convert.byte[1];
+        commandBuffer[i++] = convert.byte[1];          
         
         numBytesToSend = createDataPacket(commandBuffer, i, arrDataPacket);       
-
-        TRIG_OUT = 1;
+       
         PDownOut = 1;
+        TRIG_OUT = 1;
         xmitBreak();
+        
+        //TRIG_OUT = 1;        
         xmitPacket(numBytesToSend, arrDataPacket);
-        PDownOut = 0;
-        TX_OUT = 0;
         TRIG_OUT = 0;
+        //PDownOut = 0;
+        //TX_OUT = 0;
+        //TRIG_OUT = 0;        
         
         if (pushFlag){
             do {
@@ -146,7 +170,9 @@ union {
             DelayMs(20);
             while (!PUSHin);        
             pushFlag = FALSE;
-        }
+            autoCount = 10;            
+        }     
+        else DelayMs(50);
     }
 }
 
@@ -156,7 +182,7 @@ void init(void) {
     ADCON0 = 0;
     ADCON1 = 0b00001111; // PORT A is all digital
 
-    TRISB = 0b11011111; // RB5 is LED out
+    TRISB = 0b11011111; // RB5 is TRIG, RB4 is interrupt in
     INTCON2bits.RBPU = 0; // Enable pullups
     TRISC = 0b11111111;
     // TRISC = 0b10111111; // RC6 is TX output
@@ -240,7 +266,7 @@ unsigned short dataIndex, packetIndex;
             else dataBit = 0;
 
             // If data bit is same state as previous data bit,
-            // then packet gets two short pulses:
+            // then packet gets two short pulses:            
             if (dataBit == previousDataBit){    
                 if (state == HIGH_STATE){
                     ptrPacket[packetIndex++] = SHORT_PULSE_HI;
@@ -249,11 +275,11 @@ unsigned short dataIndex, packetIndex;
                 else{
                     ptrPacket[packetIndex++] = SHORT_PULSE_LOW;
                     ptrPacket[packetIndex++] = SHORT_PULSE_HI;                    
-                }
+                }            
             }
             // Otherwise, if data bit is different than previous,
             // then packet gets one long pulse:
-            else {
+            else {             
                 if (state == HIGH_STATE){
                     state = LOW_STATE;
                     ptrPacket[packetIndex++] = LONG_PULSE_HI;
@@ -263,7 +289,6 @@ unsigned short dataIndex, packetIndex;
                     ptrPacket[packetIndex++] = LONG_PULSE_LOW;
                 }
             }
-
             previousDataBit = dataBit;
             byteMask = byteMask << 1;
         }

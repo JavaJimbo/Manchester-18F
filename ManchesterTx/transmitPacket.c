@@ -5,17 +5,15 @@
 #define TX_OUT 		LATAbits.LATA0
 #define TRIG_OUT    PORTBbits.RB5
 
-//#define SHORT_LOW_LOOPS 160
-//#define SHORT_HIGH_LOOPS 140
+#define SHORT_LOW_LOOPS 200
+#define SHORT_HIGH_LOOPS 80
 
-#define SHORT_LOW_LOOPS 80
-#define SHORT_HIGH_LOOPS 70
-
-#define LONG_LOW_LOOPS 255 
-#define LONG_HIGH_LOOPS 233 //67
+#define LONG_LOW_LOOPS 500 // 255 
+#define LONG_HIGH_LOOPS 400 // 233 //67
 
 void xmitPacket(unsigned short numBytes, unsigned char *ptrDelay){
-    unsigned char delayTime, delayLoop;
+    // unsigned char delayTime, delayLoop;
+    unsigned short delayTime, delayLoop;
     unsigned short index;
 
     TX_OUT = 1;
@@ -60,25 +58,26 @@ void xmitPacket(unsigned short numBytes, unsigned char *ptrDelay){
 }
 
 void xmitBreak(void) {
-    unsigned char delayTime, delayLoop, numStartPulses;
+    unsigned short delayTime, delayLoop, numStartPulses;
 
-    numStartPulses = 16;
+    numStartPulses = 8;
     // Send sixteen fast pulses to settle RF
+
     do {
         TX_OUT = 1;
         delayLoop = 200;
         while (delayLoop) delayLoop--;
 
         TX_OUT = 0;
-        delayLoop = 200;
+        delayLoop = 400;
         while (delayLoop) delayLoop--;
 
         numStartPulses--;
     } while (numStartPulses);
-
-    // Send a 3 millisecond high pulse
+    
+    // Send a 3 millisecond high pulse    
     TX_OUT = 1;
-    delayTime = 12;
+    delayTime = 40;
     while (delayTime) {
         delayLoop = 74;
         while (delayLoop)delayLoop--;
@@ -111,6 +110,5 @@ void xmitBreak(void) {
         while (delayLoop)delayLoop--;
         delayTime--;
     }
-    TRIG_OUT = 1;
 }
 
